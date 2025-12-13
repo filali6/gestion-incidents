@@ -31,3 +31,18 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Local Spring config (IMPORTANT)
+
+src/main/resources/application-local.properties
+
+
+# Logs
+
+*.log
+
+
+# OS files
+
+.DS_Store
+Thumbs.db
