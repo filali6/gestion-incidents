@@ -1,9 +1,12 @@
 package com.ville.intelligente.gestionincidents.model;
 
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.List;
 
 import com.ville.intelligente.gestionincidents.model.enums.StatutIncident;
 
@@ -47,6 +50,8 @@ public class Incident {
 
     @OneToOne(mappedBy = "incident", cascade = CascadeType.ALL)
     private Photo photo;
+     
+
 
     public Incident(String titre, String description, Date dateDeclaration, String adresse, StatutIncident statut, CategorieIncident categorie, Quartier quartier) {
         this.titre = titre;
