@@ -5,38 +5,94 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Détail de l'incident</title>
 
-    <!-- Leaflet CSS -->
-    <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .container {
-            max-width: 800px;
-            margin: auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            overflow: hidden;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         .header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            padding: 20px 0;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 25px;
+            color: #2c3e50;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 15px;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: #3498db;
+            color: white;
+            border-left: 4px solid #2980b9;
+        }
+
+        .content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .detail-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .success-header {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
             padding: 30px;
             text-align: center;
-        }
-
-        .content {
-            padding: 40px;
+            border-radius: 10px;
+            margin-bottom: 30px;
         }
 
         .info-row {
@@ -48,6 +104,7 @@
         .label {
             font-weight: bold;
             color: #667eea;
+            margin-bottom: 5px;
         }
 
         .photo-preview img {
@@ -72,76 +129,137 @@
             border-radius: 8px;
             font-weight: bold;
         }
+
+        .footer {
+            background: white;
+            padding: 20px 30px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 14px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+        }
     </style>
 </head>
 
 <body>
 
-<div class="container">
-    <div class="header">
-        <h2>✅ Incident déclaré avec succès</h2>
-        <p>Référence : #<span th:text="${incident.id}"></span></p>
-    </div>
-
-    <div class="content">
-
-        <div class="info-row">
-            <div class="label">📋 Titre</div>
-            <div th:text="${incident.titre}"></div>
-        </div>
-
-        <div class="info-row">
-            <div class="label">📝 Description</div>
-            <div th:text="${incident.description}"></div>
-        </div>
-
-        <div class="info-row">
-            <div class="label">📍 Adresse</div>
-            <div th:text="${incident.adresse}"></div>
-        </div>
-
-        <div class="info-row">
-            <div class="label">📅 Date</div>
-            <div th:text="${#dates.format(incident.dateDeclaration,'dd/MM/yyyy HH:mm')}"></div>
-        </div>
-
-        <div class="info-row">
-            <div class="label">📍 Localisation GPS</div>
-            <div>
-                Latitude :
-                <span th:text="${incident.latitude}"></span>,
-                Longitude :
-                <span th:text="${incident.longitude}"></span>
-            </div>
-        </div>
-
-        <!-- PHOTO -->
-        <div th:if="${incident.photo != null}" class="photo-preview">
-            <div class="label">📸 Photo</div>
-            <img th:src="@{${incident.photo.chemin}}" alt="Photo incident">
-            <p th:text="${incident.photo.nomFichier}"></p>
-        </div>
-
-        <div th:if="${incident.photo == null}">
-            <p>📷 Aucune photo associée</p>
-        </div>
-
-        <!-- CARTE -->
-        <div id="detailMap"></div>
-
-        <div style="text-align:center">
-            <a th:href="@{/incident/declarer}" class="btn-back">
-                ← Déclarer un nouvel incident
-            </a>
-        </div>
-
+<!-- HEADER -->
+<div class="header">
+    <h1>🏙️ Gestion des Incidents - Ville Intelligente</h1>
+    <div class="header-user">
+        <span>👤 Utilisateur</span>
     </div>
 </div>
 
-<!-- Leaflet JS -->
+<!-- MAIN CONTAINER -->
+<div class="main-container">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <ul class="sidebar-menu">
+            <li>
+                <a th:href="@{/dashboard}">
+                    <span class="icon">📊</span>
+                    <span>Tableau de bord</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/incident/declarer}">
+                    <span class="icon">➕</span>
+                    <span>Déclarer un incident</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/incidents/liste}">
+                    <span class="icon">📋</span>
+                    <span>Liste des incidents</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="icon">📈</span>
+                    <span>Statistiques</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/export/csv}">
+                    <span class="icon">📥</span>
+                    <span>Export CSV</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="content">
+        <div class="detail-container">
+            <div class="success-header">
+                <h2>Incident  </h2>
+                <p>Référence : #<span th:text="${incident.id}"></span></p>
+            </div>
+
+            <div class="info-row">
+                <div class="label">📋 Titre</div>
+                <div th:text="${incident.titre}"></div>
+            </div>
+
+            <div class="info-row">
+                <div class="label">📝 Description</div>
+                <div th:text="${incident.description}"></div>
+            </div>
+
+            <div class="info-row">
+                <div class="label">📍 Adresse</div>
+                <div th:text="${incident.adresse}"></div>
+            </div>
+
+            <div class="info-row">
+                <div class="label">📅 Date</div>
+                <span th:text="${#temporals.format(incident.dateDeclaration,'dd/MM/yyyy HH:mm')}"></span>
+            </div>
+
+            <div class="info-row">
+                <div class="label">📍 Localisation GPS</div>
+                <div>
+                    Latitude : <span th:text="${incident.latitude}"></span>,
+                    Longitude : <span th:text="${incident.longitude}"></span>
+                </div>
+            </div>
+
+            <div th:if="${incident.photo != null}" class="photo-preview">
+                <div class="label">📸 Photo</div>
+                <img th:src="@{${incident.photo.chemin}}" alt="Photo incident">
+                <p th:text="${incident.photo.nomFichier}"></p>
+            </div>
+
+            <div th:if="${incident.photo == null}">
+                <p>📷 Aucune photo associée</p>
+            </div>
+
+            <div id="detailMap"></div>
+
+            <div style="text-align:center">
+                <a th:href="@{/incident/declarer}" class="btn-back">
+                    ← Déclarer un nouvel incident
+                </a>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <p>&copy; 2025 Ville Intelligente - Plateforme de Gestion des Incidents | Tous droits réservés</p>
+</footer>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<!-- ⚠️ SCRIPT THYMELEAF INLINE (OBLIGATOIRE) -->
 <script th:inline="javascript">
     const latitude = [[${incident.latitude}]];
     const longitude = [[${incident.longitude}]];
