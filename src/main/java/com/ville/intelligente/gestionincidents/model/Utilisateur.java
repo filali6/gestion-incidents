@@ -68,4 +68,8 @@ public class Utilisateur {
     // Notifications reçues
     @OneToMany(mappedBy = "utilisateur", fetch = FetchType.LAZY)
     private List<Notification> notifications;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "departement_id")
+    private CategorieIncident departement;
 }
