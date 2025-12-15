@@ -3,7 +3,9 @@ package com.ville.intelligente.gestionincidents.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.CascadeType;
 import java.util.HashSet;
@@ -18,9 +20,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="categories_incident")
-
-
+@Table(name = "categories_incident")
 
 public class CategorieIncident {
     @Id
@@ -28,17 +28,24 @@ public class CategorieIncident {
     private Long id;
     private String nom;
 
-    @OneToMany(mappedBy="categorie",cascade=CascadeType.ALL,orphanRemoval=true)
-    private Set<Incident> incidents= new HashSet<>();
+    @OneToMany(mappedBy = "categorie", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Incident> incidents = new HashSet<>();
 
-    public CategorieIncident(String nom){
-        this.nom=nom;
+    @OneToOne
+    @JoinColumn(name = "admin_id")
+    private Utilisateur admin;
+
+    @OneToMany(mappedBy = "departement")
+    private Set<Utilisateur> agents = new HashSet<>();
+
+    public CategorieIncident(String nom) {
+        this.nom = nom;
     }
+
     @Override
-    public String toString(){
+    public String toString() {
         return "CategorieIncident [id=" + id + ", nom=" + nom + "]";
- 
+
     }
 
-    
 }
