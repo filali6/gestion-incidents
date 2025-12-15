@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Déclarer un Incident</title>
     
-    <!-- ⭐ LEAFLET CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
@@ -17,34 +16,85 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f5f6fa;
+            display: flex;
+            flex-direction: column;
             min-height: 100vh;
-            padding: 20px;
         }
 
-        .container {
+        /* HEADER */
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        /* MAIN CONTAINER */
+        .main-container {
+            display: flex;
+            flex: 1;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 250px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            padding: 20px 0;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 25px;
+            color: #2c3e50;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 15px;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: #3498db;
+            color: white;
+            border-left: 4px solid #2980b9;
+        }
+
+        /* CONTENT */
+        .content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .form-container {
             max-width: 700px;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .header h2 {
-            font-size: 28px;
-            font-weight: 600;
-        }
-
-        .form-container {
             padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .page-title {
+            font-size: 28px;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
         }
 
         .form-group {
@@ -62,7 +112,8 @@
         input[type="text"],
         textarea,
         select,
-        input[type="file"] {
+        input[type="file"],
+        input[type="number"] {
             width: 100%;
             padding: 12px;
             border: 2px solid #e0e0e0;
@@ -106,7 +157,6 @@
             color: #e74c3c;
         }
 
-        /* ⭐ STYLES POUR LA CARTE */
         #map {
             width: 100%;
             height: 400px;
@@ -140,243 +190,255 @@
             font-weight: 600;
             color: #667eea;
         }
+
+        /* FOOTER */
+        .footer {
+            background: white;
+            padding: 20px 30px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 14px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h2>🚨 Déclarer un Incident</h2>
-    </div>
-
-    <div class="form-container">
-        <form th:action="@{/incident/save}" th:object="${incident}" method="post" enctype="multipart/form-data">
-            
-            <!-- Titre -->
-            <div class="form-group">
-                <label for="titre">📋 Titre <span class="required">*</span></label>
-                <input type="text" id="titre" th:field="*{titre}" placeholder="Ex: Nid-de-poule sur Avenue Habib Bourguiba" required>
-            </div>
-
-            <!-- Description -->
-            <div class="form-group">
-                <label for="description">📝 Description <span class="required">*</span></label>
-                <textarea id="description" th:field="*{description}" placeholder="Décrivez l'incident en détail..." required></textarea>
-            </div>
-
-            <!-- Catégorie -->
-            <div class="form-group">
-                <label for="categorieNom">🏷️ Catégorie <span class="required">*</span></label>
-                <select id="categorieNom" name="categorieNom" required>
-                    <option value="">-- Sélectionnez une catégorie --</option>
-                    <option value="Infrastructure">🏗️ Infrastructure</option>
-                    <option value="Propreté">🧹 Propreté</option>
-                    <option value="Sécurité">🚨 Sécurité</option>
-                    <option value="Éclairage">💡 Éclairage</option>
-                    <option value="Transport">🚌 Transport</option>
-                    <option value="Environnement">🌳 Environnement</option>
-                    <option value="Autre">❓ Autre</option>
-                </select>
-            </div>
-
-            <!-- Quartier (3 champs sur la même ligne) -->
-            <div class="form-group">
-                <label>📍 Quartier <span class="required">*</span></label>
-                <div style="display: grid; grid-template-columns: 2fr 2fr 1fr; gap: 10px;">
-                    <input type="text" id="quartierNom" name="quartierNom" placeholder="Nom du quartier" required>
-                    <input type="text" id="quartierVille" name="quartierVille" placeholder="Ville" required>
-                    <input type="number" id="quartierCodePostal" name="quartierCodePostal" placeholder="Code postal" required>
-                </div>
-            </div>
-
-            <!-- Adresse -->
-            <div class="form-group">
-                <label for="adresse">🗺️ Adresse précise <span class="required">*</span></label>
-                <input type="text" id="adresse" th:field="*{adresse}" placeholder="Ex: 15 Rue de la Liberté, Tunis" required>
-            </div>
-
-            <!-- ⭐ CARTE LEAFLET -->
-            <div class="form-group">
-                <label>📍 Localisation sur la carte <span class="required">*</span></label>
-                <p style="font-size: 13px; color: #666; margin-bottom: 10px;">
-                    Cliquez sur la carte ou utilisez votre position actuelle
-                </p>
-                
-                <!-- Bouton pour détecter la position -->
-                <button type="button" id="getLocationBtn" style="
-                    width: 100%;
-                    padding: 12px;
-                    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-                    color: white;
-                    border: none;
-                    border-radius: 8px;
-                    font-size: 15px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    margin-bottom: 15px;
-                    transition: all 0.3s ease;
-                " onmouseover="this.style.transform='translateY(-2px)'" 
-                   onmouseout="this.style.transform='translateY(0)'">
-                    📍 Utiliser ma position actuelle
-                </button>
-                
-                <!-- La carte -->
-                <div id="map"></div>
-                
-                <!-- Affichage des coordonnées -->
-                <div class="coord-display">
-                    <div class="coord-box">
-                        <div class="coord-label">📌 Latitude</div>
-                        <div class="coord-value" id="latDisplay">--</div>
-                    </div>
-                    <div class="coord-box">
-                        <div class="coord-label">📌 Longitude</div>
-                        <div class="coord-value" id="lngDisplay">--</div>
-                    </div>
-                </div>
-                
-                <!-- Champs cachés pour envoyer au serveur -->
-                <input type="hidden" id="latitude" th:field="*{latitude}">
-                <input type="hidden" id="longitude" th:field="*{longitude}">
-            </div>
-
-            <!-- Priorité -->
-            <div class="form-group">
-                <label for="priorite">⚠️ Priorité</label>
-                <select id="priorite" th:field="*{priorite}">
-                    <option value="1">🟢 Faible</option>
-                    <option value="2" selected>🟡 Moyenne</option>
-                    <option value="3">🟠 Haute</option>
-                    <option value="4">🔴 Critique</option>
-                </select>
-            </div>
-
-            <!-- Photo -->
-            <div class="form-group">
-                <label for="photoFile">📸 Photo de l'incident</label>
-                <input type="file" id="photoFile" name="photoFile" accept="image/*">
-            </div>
-
-            <!-- Bouton Submit -->
-            <button type="submit" class="btn-submit">✅ Déclarer l'incident</button>
-        </form>
+<!-- HEADER -->
+<div class="header">
+    <h1>🏙️ Gestion des Incidents - Ville Intelligente</h1>
+    <div class="header-user">
+        <span>👤 Utilisateur</span>
     </div>
 </div>
 
-<!-- ⭐ LEAFLET JS -->
+<!-- MAIN CONTAINER -->
+<div class="main-container">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <ul class="sidebar-menu">
+            <li>
+                <a th:href="@{/dashboard}">
+                    <span class="icon">📊</span>
+                    <span>Tableau de bord</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/incident/declarer}" class="active">
+                    <span class="icon">➕</span>
+                    <span>Déclarer un incident</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/incidents/liste}">
+                    <span class="icon">📋</span>
+                    <span>Liste des incidents</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="icon">📈</span>
+                    <span>Statistiques</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/export/csv}">
+                    <span class="icon">📥</span>
+                    <span>Export CSV</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="content">
+        <div class="form-container">
+            <h2 class="page-title">🚨 Déclarer un Incident</h2>
+            
+            <form th:action="@{/incident/save}" th:object="${incident}" method="post" enctype="multipart/form-data">
+                
+                <div class="form-group">
+                    <label for="titre">📋 Titre <span class="required">*</span></label>
+                    <input type="text" id="titre" th:field="*{titre}" placeholder="Ex: Nid-de-poule sur Avenue Habib Bourguiba" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">📝 Description <span class="required">*</span></label>
+                    <textarea id="description" th:field="*{description}" placeholder="Décrivez l'incident en détail..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="categorieNom">🏷️ Catégorie <span class="required">*</span></label>
+                    <select id="categorieNom" name="categorieNom" required>
+                        <option value="">-- Sélectionnez une catégorie --</option>
+                        <option value="Infrastructure">🏗️ Infrastructure</option>
+                        <option value="Propreté">🧹 Propreté</option>
+                        <option value="Sécurité">🚨 Sécurité</option>
+                        <option value="Éclairage">💡 Éclairage</option>
+                        <option value="Transport">🚌 Transport</option>
+                        <option value="Environnement">🌳 Environnement</option>
+                        <option value="Autre">❓ Autre</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>📍 Quartier <span class="required">*</span></label>
+                    <div style="display: grid; grid-template-columns: 2fr 2fr 1fr; gap: 10px;">
+                        <input type="text" id="quartierNom" name="quartierNom" placeholder="Nom du quartier" required>
+                        <input type="text" id="quartierVille" name="quartierVille" placeholder="Ville" required>
+                        <input type="number" id="quartierCodePostal" name="quartierCodePostal" placeholder="Code postal" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="adresse">🗺️ Adresse précise <span class="required">*</span></label>
+                    <input type="text" id="adresse" th:field="*{adresse}" placeholder="Ex: 15 Rue de la Liberté, Tunis" required>
+                </div>
+
+                <div class="form-group">
+                    <label>📍 Localisation sur la carte <span class="required">*</span></label>
+                    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">
+                        Cliquez sur la carte ou utilisez votre position actuelle
+                    </p>
+                    
+                    <button type="button" id="getLocationBtn" style="
+                        width: 100%;
+                        padding: 12px;
+                        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 15px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        margin-bottom: 15px;
+                    ">
+                        📍 Utiliser ma position actuelle
+                    </button>
+                    
+                    <div id="map"></div>
+                    
+                    <div class="coord-display">
+                        <div class="coord-box">
+                            <div class="coord-label">📌 Latitude</div>
+                            <div class="coord-value" id="latDisplay">--</div>
+                        </div>
+                        <div class="coord-box">
+                            <div class="coord-label">📌 Longitude</div>
+                            <div class="coord-value" id="lngDisplay">--</div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="latitude" th:field="*{latitude}">
+                    <input type="hidden" id="longitude" th:field="*{longitude}">
+                </div>
+
+                <div class="form-group">
+                    <label for="priorite">⚠️ Priorité</label>
+                    <select id="priorite" th:field="*{priorite}">
+                        <option value="1">🟢 Faible</option>
+                        <option value="2" selected>🟡 Moyenne</option>
+                        <option value="3">🟠 Haute</option>
+                        <option value="4">🔴 Critique</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="photoFile">📸 Photo de l'incident</label>
+                    <input type="file" id="photoFile" name="photoFile" accept="image/*">
+                </div>
+
+                <button type="submit" class="btn-submit">✅ Déclarer l'incident</button>
+            </form>
+        </div>
+    </main>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <p>&copy; 2025 Ville Intelligente - Plateforme de Gestion des Incidents | Tous droits réservés</p>
+</footer>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    // Initialiser la carte centrée sur Tunis
     const map = L.map('map').setView([36.8065, 10.1815], 12);
     
-    // Ajouter le fond de carte OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
     
-    // Variable pour stocker le marqueur
     let marker = null;
     
-    // Fonction pour mettre à jour les coordonnées
     function updateCoordinates(lat, lng) {
-        // Mettre à jour l'affichage
         document.getElementById('latDisplay').textContent = lat.toFixed(6);
         document.getElementById('lngDisplay').textContent = lng.toFixed(6);
-        
-        // Mettre à jour les champs cachés
         document.getElementById('latitude').value = lat;
         document.getElementById('longitude').value = lng;
     }
     
-    // Événement au clic sur la carte
     map.on('click', function(e) {
         const lat = e.latlng.lat;
         const lng = e.latlng.lng;
         
-        // Supprimer l'ancien marqueur s'il existe
         if (marker) {
             map.removeLayer(marker);
         }
         
-        // Ajouter un nouveau marqueur
         marker = L.marker([lat, lng]).addTo(map);
-        
-        // Mettre à jour les coordonnées
         updateCoordinates(lat, lng);
     });
     
-    // ⭐ GÉOLOCALISATION : Détecter la position actuelle
     document.getElementById('getLocationBtn').addEventListener('click', function() {
-        // Vérifier si le navigateur supporte la géolocalisation
         if (!navigator.geolocation) {
             alert('❌ Votre navigateur ne supporte pas la géolocalisation');
             return;
         }
         
-        // Désactiver le bouton pendant la détection
         const btn = this;
         btn.disabled = true;
         btn.innerHTML = '🔄 Détection en cours...';
         
-        // Demander la position
         navigator.geolocation.getCurrentPosition(
             function(position) {
-                // Succès : récupérer les coordonnées
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
                 
-                // Centrer la carte sur la position
                 map.setView([lat, lng], 16);
                 
-                // Supprimer l'ancien marqueur
                 if (marker) {
                     map.removeLayer(marker);
                 }
                 
-                // Ajouter le marqueur avec popup
                 marker = L.marker([lat, lng]).addTo(map)
                     .bindPopup('📍 Votre position actuelle')
                     .openPopup();
                 
-                // Mettre à jour les coordonnées
                 updateCoordinates(lat, lng);
                 
-                // Réactiver le bouton
                 btn.disabled = false;
                 btn.innerHTML = '✅ Position détectée !';
                 
-                // Remettre le texte d'origine après 2 secondes
                 setTimeout(() => {
                     btn.innerHTML = '📍 Utiliser ma position actuelle';
                 }, 2000);
             },
             function(error) {
-                // Erreur
-                let message = '❌ Impossible de détecter votre position';
-                
-                switch(error.code) {
-                    case error.PERMISSION_DENIED:
-                        message = '❌ Vous avez refusé l\'accès à la localisation';
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        message = '❌ Position indisponible';
-                        break;
-                    case error.TIMEOUT:
-                        message = '❌ Temps de détection dépassé';
-                        break;
-                }
-                
-                alert(message);
-                
-                // Réactiver le bouton
+                alert('❌ Impossible de détecter votre position');
                 btn.disabled = false;
                 btn.innerHTML = '📍 Utiliser ma position actuelle';
             },
             {
-                enableHighAccuracy: true,  // Meilleure précision (GPS)
-                timeout: 10000,            // Timeout de 10 secondes
-                maximumAge: 0              // Ne pas utiliser de cache
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
             }
         );
     });

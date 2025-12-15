@@ -4,7 +4,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
+import java.sql.Date;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ville.intelligente.gestionincidents.dao.IncidentDAO;
@@ -58,7 +61,7 @@ public class IncidentServiceImpl implements IncidentService {
         
         // 3. Initialiser statut et date
         incident.setStatut(StatutIncident.SIGNALE);
-        incident.setDateDeclaration(new Date());
+        incident.setDateDeclaration(LocalDateTime.now());
     
     
         // 1. Sauvegarder l'incident d'abord
@@ -83,7 +86,7 @@ public class IncidentServiceImpl implements IncidentService {
                 Photo photo = new Photo();
                 photo.setNomFichier(fileName);
                 photo.setType(photoFile.getContentType());
-                photo.setDateUpload(new Date());
+                photo.setDateUpload(LocalDateTime.now());
                 photo.setChemin("/uploads/" + fileName);  // chemin relatif pour Thymeleaf
                 photo.setIncident(savedIncident);
 
@@ -97,6 +100,17 @@ public class IncidentServiceImpl implements IncidentService {
             }
         }
         return savedIncident;
+    }
+    
+    @Override
+    public List<Incident> findAll() {
+        return incidentDao.findAll();
+    }
+    
+    @Override
+    public List<Incident> findByFilters(StatutIncident statut, String categorie, String quartier, Date dateDeclaration
+             ) {
+        return incidentDao.findByFilters(statut, categorie,quartier,dateDeclaration);
     }
     
     

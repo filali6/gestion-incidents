@@ -2,8 +2,9 @@ package com.ville.intelligente.gestionincidents.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
+ 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.List;
@@ -29,7 +30,7 @@ public class Incident {
 
     private String titre;
     private String description;
-    private Date dateDeclaration;
+    private LocalDateTime dateDeclaration;
     private String adresse;
     private String feedbackCitoyen;
     private int priorite;
@@ -53,7 +54,7 @@ public class Incident {
      
 
 
-    public Incident(String titre, String description, Date dateDeclaration, String adresse, StatutIncident statut, CategorieIncident categorie, Quartier quartier) {
+    public Incident(String titre, String description, LocalDateTime dateDeclaration, String adresse, StatutIncident statut, CategorieIncident categorie, Quartier quartier) {
         this.titre = titre;
         this.description = description;
         this.dateDeclaration = dateDeclaration;
