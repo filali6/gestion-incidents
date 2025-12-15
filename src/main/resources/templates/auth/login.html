@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Gestion Incidents</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+    <h1>Connexion</h1>
+
+    <!-- MESSAGE SUCCÈS EMAIL VÉRIFIÉ -->
+    <p th:if="${param.verified}" style="color: green;">
+        ✅ Email vérifié avec succès. Vous pouvez maintenant vous connecter.
+    </p>
+
+    <!-- MESSAGE ERREUR LOGIN -->
+    <p th:if="${param.error}" style="color: red;">
+        ❌ Email ou mot de passe incorrect, ou compte non activé.
+    </p>
+
+    <!-- MESSAGE LOGOUT -->
+    <p th:if="${param.logout}" style="color: blue;">
+        ℹ️ Vous avez été déconnecté avec succès.
+    </p>
+
+    <form th:action="@{/login}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <label for="email">Email</label>
+        <input id="email" type="email" name="username" placeholder="exemple@email.com" required />
+
+        <label for="password">Mot de passe</label>
+        <input id="password" type="password" name="password" placeholder="********" required />
+
+        <button type="submit">Se connecter</button>
+    </form>
+
+    <p>
+        Pas encore inscrit ?
+        <a th:href="@{/register}">Créer un compte</a>
+    </p>
+
+</body>
+
+</html>

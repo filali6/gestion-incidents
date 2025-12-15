@@ -48,8 +48,14 @@ public class Utilisateur {
     @Column(nullable = false)
     private LocalDateTime dateInscription;
 
+    @Builder.Default
     @Column(nullable = false)
-    private boolean actif = true;
+    private boolean actif = false;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean emailVerifie = false;
+    private String tokenVerificationEmail;
 
     // Incidents déclarés (citoyen)
     @OneToMany(mappedBy = "citoyen", fetch = FetchType.LAZY)
