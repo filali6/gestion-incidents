@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détail de l'incident</title>
+
+    <!-- Leaflet CSS -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .info-row {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .photo-preview img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        #detailMap {
+            height: 300px;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>✅ Incident déclaré avec succès</h2>
+        <p>Référence : #<span th:text="${incident.id}"></span></p>
+    </div>
+
+    <div class="content">
+
+        <div class="info-row">
+            <div class="label">📋 Titre</div>
+            <div th:text="${incident.titre}"></div>
+        </div>
+
+        <div class="info-row">
+            <div class="label">📝 Description</div>
+            <div th:text="${incident.description}"></div>
+        </div>
+
+        <div class="info-row">
+            <div class="label">📍 Adresse</div>
+            <div th:text="${incident.adresse}"></div>
+        </div>
+
+        <div class="info-row">
+            <div class="label">📅 Date</div>
+            <div th:text="${#dates.format(incident.dateDeclaration,'dd/MM/yyyy HH:mm')}"></div>
+        </div>
+
+        <div class="info-row">
+            <div class="label">📍 Localisation GPS</div>
+            <div>
+                Latitude :
+                <span th:text="${incident.latitude}"></span>,
+                Longitude :
+                <span th:text="${incident.longitude}"></span>
+            </div>
+        </div>
+
+        <!-- PHOTO -->
+        <div th:if="${incident.photo != null}" class="photo-preview">
+            <div class="label">📸 Photo</div>
+            <img th:src="@{${incident.photo.chemin}}" alt="Photo incident">
+            <p th:text="${incident.photo.nomFichier}"></p>
+        </div>
+
+        <div th:if="${incident.photo == null}">
+            <p>📷 Aucune photo associée</p>
+        </div>
+
+        <!-- CARTE -->
+        <div id="detailMap"></div>
+
+        <div style="text-align:center">
+            <a th:href="@{/incident/declarer}" class="btn-back">
+                ← Déclarer un nouvel incident
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- ⚠️ SCRIPT THYMELEAF INLINE (OBLIGATOIRE) -->
+<script th:inline="javascript">
+    const latitude = [[${incident.latitude}]];
+    const longitude = [[${incident.longitude}]];
+
+    if (latitude !== null && longitude !== null) {
+        const map = L.map('detailMap').setView([latitude, longitude], 15);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        L.marker([latitude, longitude]).addTo(map);
+    }
+</script>
+
+</body>
+</html>
