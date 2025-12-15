@@ -12,7 +12,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -48,14 +47,26 @@ public class Incident {
     @OneToOne(mappedBy = "incident", cascade = CascadeType.ALL)
     private Photo photo;
 
-    public Incident(String titre, String description, Date dateDeclaration, String adresse, StatutIncident statut, CategorieIncident categorie, Quartier quartier) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "citoyen_id")
+    private Utilisateur citoyen;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "agent_id")
+    private Utilisateur agentAssigne;
+
+    @OneToMany(mappedBy = "incident", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Notification> notifications = new HashSet<>();
+
+    public Incident(String titre, String description, Date dateDeclaration, String adresse, StatutIncident statut,
+            CategorieIncident categorie, Quartier quartier) {
         this.titre = titre;
         this.description = description;
         this.dateDeclaration = dateDeclaration;
         this.adresse = adresse;
         this.statut = statut;
-        this.categorie=categorie;
+        this.categorie = categorie;
         this.quartier = quartier;
     }
-    
+
 }
