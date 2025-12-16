@@ -32,9 +32,12 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/register", "/verify", "/css/**", "/js/**").permitAll()
+
+                        .requestMatchers("/super-admin/**").hasRole("SUPER_ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/agent/**").hasRole("AGENT")
                         .requestMatchers("/citoyen/**").hasRole("CITIZEN")
+
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")

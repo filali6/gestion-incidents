@@ -1,9 +1,12 @@
 package com.ville.intelligente.gestionincidents.service;
 
+import com.ville.intelligente.gestionincidents.dto.CreateAdminAgentRequest;
 import com.ville.intelligente.gestionincidents.dto.RegisterRequest;
+import com.ville.intelligente.gestionincidents.model.CategorieIncident;
 import com.ville.intelligente.gestionincidents.model.Utilisateur;
 import com.ville.intelligente.gestionincidents.model.enums.Role;
 import com.ville.intelligente.gestionincidents.repository.UtilisateurRepository;
+import com.ville.intelligente.gestionincidents.dao.CategorieIncidentDAO;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,14 +18,17 @@ import java.util.UUID;
 public class UtilisateurService {
 
     private final UtilisateurRepository utilisateurRepository;
+    private final CategorieIncidentDAO categorieIncidentDAO;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
     public UtilisateurService(
             UtilisateurRepository utilisateurRepository,
+            CategorieIncidentDAO categorieIncidentDAO,
             PasswordEncoder passwordEncoder,
             EmailService emailService) {
         this.utilisateurRepository = utilisateurRepository;
+        this.categorieIncidentDAO = categorieIncidentDAO;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
     }
@@ -55,9 +61,6 @@ public class UtilisateurService {
 
         utilisateurRepository.save(utilisateur);
 
-        // =========================
-        // EMAIL DE VERIFICATION
-        // =========================
         String lienVerification = "http://localhost:8080/verify?token=" + utilisateur.getTokenVerificationEmail();
 
         String contenu = "<p>Bonjour " + utilisateur.getPrenom() + ",</p>" +
@@ -74,33 +77,56 @@ public class UtilisateurService {
     }
 
     // =========================
-    // CREATION AGENT / ADMIN
+    // CREATION ADMIN / AGENT
     // =========================
-    public Utilisateur creerUtilisateurParAdmin(Utilisateur utilisateur, Role role) {
+    public Utilisateur creerUtilisateurParSuperAdmin(CreateAdminAgentRequest request) {
 
-        if (role == Role.ROLE_CITIZEN) {
+        if (request.getRole() == Role.ROLE_CITIZEN) {
             throw new IllegalArgumentException("Un citoyen doit passer par l'inscription publique");
         }
 
-        if (utilisateurRepository.existsByEmail(utilisateur.getEmail())) {
+        if (utilisateurRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email déjà utilisé");
         }
 
-        utilisateur.setMotDePasse(passwordEncoder.encode(utilisateur.getMotDePasse()));
-        utilisateur.setRole(role);
-        utilisateur.setDateInscription(LocalDateTime.now());
-        utilisateur.setActif(true);
-        utilisateur.setEmailVerifie(true);
-        utilisateur.setTokenVerificationEmail(null);
+        // Récupération du département
+        CategorieIncident departement = categorieIncidentDAO.findById(request.getDepartementId())
+                .orElseThrow(() -> new RuntimeException("Département introuvable"));
 
-        return utilisateurRepository.save(utilisateur);
+        // CAS : CREATION ADMIN
+        if (request.getRole() == Role.ROLE_ADMIN && departement.getAdmin() != null) {
+            throw new RuntimeException("Ce département possède déjà un administrateur");
+        }
+
+        Utilisateur utilisateur = Utilisateur.builder()
+                .nom(request.getNom())
+                .prenom(request.getPrenom())
+                .email(request.getEmail())
+                .telephone(request.getTelephone())
+                .motDePasse(passwordEncoder.encode(request.getMotDePasse()))
+                .role(request.getRole())
+                .dateInscription(LocalDateTime.now())
+                .actif(true)
+                .emailVerifie(true)
+                .tokenVerificationEmail(null)
+                .departement(departement)
+                .build();
+
+        utilisateurRepository.save(utilisateur);
+
+        // AFFECTATION ADMIN → DEPARTEMENT
+        if (request.getRole() == Role.ROLE_ADMIN) {
+            departement.setAdmin(utilisateur);
+            categorieIncidentDAO.save(departement);
+        }
+
+        return utilisateur;
     }
 
     // =========================
     // VERIFICATION EMAIL
     // =========================
     public void verifierEmail(String token) {
-
         Utilisateur utilisateur = utilisateurRepository
                 .findByTokenVerificationEmail(token)
                 .orElseThrow(() -> new RuntimeException("Token de vérification invalide"));
