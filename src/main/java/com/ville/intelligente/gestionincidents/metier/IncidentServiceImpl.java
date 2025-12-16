@@ -43,6 +43,30 @@ public class IncidentServiceImpl implements IncidentService {
     public Incident saveIncident(Incident incident) {
         return incidentDao.save(incident);
     }
+    
+    // ⭐ AJOUTE CETTE MÉTHODE
+    private boolean isImageValid(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return true; // Optionnel, donc valide si vide
+        }
+
+        // Vérifier la taille (5 MB max)
+        if (file.getSize() > 5 * 1024 * 1024) {
+            return false;
+        }
+
+        // Vérifier le type MIME
+        String contentType = file.getContentType();
+        if (contentType == null) {
+            return false;
+        }
+
+        // Types autorisés : JPEG, PNG, GIF, WebP
+        return contentType.equals("image/jpeg") ||
+                contentType.equals("image/png") ||
+                contentType.equals("image/gif") ||
+                contentType.equals("image/webp");
+    }
    @Override
 
     public Incident saveIncidentWithPhoto(Incident incident, MultipartFile photoFile, String categorieNom,
@@ -70,6 +94,9 @@ public class IncidentServiceImpl implements IncidentService {
         // 2. Si un fichier est uploadé
         if (photoFile != null && !photoFile.isEmpty()) {
             try {
+                if (!isImageValid(photoFile)) {
+                    throw new IllegalArgumentException("Fichier non valide : type ou taille incorrecte");
+                }
                 // 2a. Créer un dossier 'uploads' dans resources/static si pas existant
                 String uploadDir = "C:/Users/HP/Desktop/gestion-incidents/src/main/resources/static/uploads";
                 File dir = new File(uploadDir);
