@@ -1,0 +1,21 @@
+package com.ville.intelligente.gestionincidents.metier;
+
+ 
+import java.sql.Date;
+import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import com.ville.intelligente.gestionincidents.model.Incident;
+import com.ville.intelligente.gestionincidents.model.enums.StatutIncident;
+
+public interface IncidentService {
+    Incident saveIncident(Incident incident);
+    
+    public Incident saveIncidentWithPhoto(Incident incident, MultipartFile photoFile,String categorieNom,
+            String quartierNom, String quartierVille, int quartierCodePostal);
+    
+    List<Incident> findAll();
+    List<Incident> findByFilters(StatutIncident statut, String categorie,String quartier, Date dateDeclaration);
+    
+}

@@ -1,11 +1,13 @@
 package com.ville.intelligente.gestionincidents.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,19 +25,20 @@ public class Photo {
     @GeneratedValue
     private long id ;
     private String nomFichier ; 
+    private String chemin;
     private String type ;
-    private Date dateUpload ;
+    private LocalDateTime dateUpload ;
 
-    @Lob
-    private byte [] donnees ;
-    @ManyToOne
-    private Incident incident ;
+     
+    @OneToOne
+    @JoinColumn(name = "incident_id")
+    private Incident incident;
     
-    public Photo(String nomFichier, String type, Date dateUpload, byte[] donnees) {
+    public Photo(String nomFichier, String type, LocalDateTime dateUpload ) {
         this.nomFichier = nomFichier;
         this.type = type;
         this.dateUpload = dateUpload;
-        this.donnees = donnees;
+        
     }
 
 

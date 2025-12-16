@@ -1,26 +1,33 @@
 package com.ville.intelligente.gestionincidents.controller;
 
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.ville.intelligente.gestionincidents.metier.StatistiqueService;
+
+import org.springframework.ui.Model;
+
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
+@RequestMapping("/dashboard")
 public class DashboardController {
+    private final StatistiqueService statistiqueService;
 
-    @GetMapping("/dashboard")
-    public String redirectByRole(Authentication auth) {
-
-        if (auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN"))) {
-            return "redirect:/super-admin/dashboard";
-        } else if (auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-            return "redirect:/admin/dashboard";
-        } else if (auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_AGENT"))) {
-            return "redirect:/agent/dashboard";
-        } else {
-            return "redirect:/citoyen/dashboard";
-        }
+    public DashboardController(StatistiqueService statistiqueService) {
+        this.statistiqueService = statistiqueService;
     }
+
+    @GetMapping
+    public String afficherDashboard(Model model) {
+        // Passer les stats au template
+        model.addAttribute("totalIncidents", statistiqueService.compterTotalIncidents());
+        model.addAttribute("statsStatut", statistiqueService.getStatistiquesParStatut());
+        model.addAttribute("statsCategorie", statistiqueService.getStatistiquesParCategorie());
+        model.addAttribute("statsQuartiers", statistiqueService.getTop5Quartiers());
+
+        return "dashboard";
+    }
+
 }
