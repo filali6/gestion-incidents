@@ -32,7 +32,7 @@ public class CategorieIncident {
     private Set<Incident> incidents = new HashSet<>();
 
     @OneToOne
-    @JoinColumn(name = "admin_id")
+    @JoinColumn(name = "admin_id", unique = true)
     private Utilisateur admin;
 
     @OneToMany(mappedBy = "departement")

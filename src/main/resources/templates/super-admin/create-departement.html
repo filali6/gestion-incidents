@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Créer un département</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+    <h1>Créer un département</h1>
+
+    <!-- Messages succès / erreur -->
+    <div th:if="${successMessage}" th:text="${successMessage}" class="alert alert-success">
+    </div>
+
+    <div th:if="${errorMessage}" th:text="${errorMessage}" class="alert alert-danger">
+    </div>
+
+    <form th:action="@{/super-admin/create-departement}" th:object="${createDepartementRequest}" method="post">
+
+        <!-- ✅ CSRF TOKEN (OBLIGATOIRE) -->
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <label for="nom">Nom du département :</label>
+        <input id="nom" type="text" th:field="*{nom}" placeholder="Nom du département" />
+
+        <div th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}" class="error">
+        </div>
+
+        <button type="submit">Créer</button>
+    </form>
+
+    <br>
+
+    <a th:href="@{/super-admin/dashboard}">Retour au Dashboard</a>
+
+</body>
+
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Créer un utilisateur</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+    <h1>Créer un utilisateur (Admin / Agent)</h1>
+
+    <div th:if="${successMessage}" th:text="${successMessage}" class="alert alert-success"></div>
+    <div th:if="${errorMessage}" th:text="${errorMessage}" class="alert alert-danger"></div>
+
+    <form th:action="@{/super-admin/create-user}" th:object="${createUserRequest}" method="post">
+
+        <!-- ✅ CSRF -->
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <label>Nom :</label>
+        <input type="text" th:field="*{nom}" />
+        <div th:errors="*{nom}" class="error"></div>
+
+        <label>Prénom :</label>
+        <input type="text" th:field="*{prenom}" />
+        <div th:errors="*{prenom}" class="error"></div>
+
+        <label>Email :</label>
+        <input type="email" th:field="*{email}" />
+        <div th:errors="*{email}" class="error"></div>
+
+        <label>Téléphone :</label>
+        <input type="text" th:field="*{telephone}" />
+
+        <label>Mot de passe :</label>
+        <input type="password" th:field="*{motDePasse}" />
+        <div th:errors="*{motDePasse}" class="error"></div>
+
+        <label>Rôle :</label>
+        <select th:field="*{role}">
+            <option value="">-- Choisir --</option>
+            <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"></option>
+        </select>
+        <div th:errors="*{role}" class="error"></div>
+
+        <label>Département :</label>
+        <select th:field="*{departementId}">
+            <option value="">-- Choisir --</option>
+            <option th:each="d : ${departements}" th:value="${d.id}" th:text="${d.nom}"></option>
+        </select>
+        <div th:errors="*{departementId}" class="error"></div>
+
+        <button type="submit">Créer</button>
+    </form>
+
+</body>
+
+</html>

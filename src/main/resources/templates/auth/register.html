@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription - Gestion Incidents</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+    <h1>Inscription citoyen</h1>
+
+    <!-- MESSAGE ERREUR GLOBAL -->
+    <p th:if="${errorMessage}" th:text="${errorMessage}" style="color:red;"></p>
+
+    <form th:action="@{/register}" th:object="${registerRequest}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <label>Nom</label>
+        <input type="text" th:field="*{nom}" placeholder="Nom" required />
+        <p th:errors="*{nom}" style="color:red;"></p>
+
+        <label>Prénom</label>
+        <input type="text" th:field="*{prenom}" placeholder="Prénom" required />
+        <p th:errors="*{prenom}" style="color:red;"></p>
+
+        <label>Email</label>
+        <input type="email" th:field="*{email}" placeholder="exemple@email.com" required />
+        <p th:errors="*{email}" style="color:red;"></p>
+
+        <label>Mot de passe</label>
+        <input type="password" th:field="*{motDePasse}" placeholder="********" required />
+        <p th:errors="*{motDePasse}" style="color:red;"></p>
+
+        <label>Confirmer le mot de passe</label>
+        <input type="password" th:field="*{confirmMotDePasse}" placeholder="********" required />
+
+        <label>Téléphone</label>
+        <input type="text" th:field="*{telephone}" placeholder="0612345678" />
+
+        <button type="submit">Créer mon compte</button>
+    </form>
+
+    <p>
+        Déjà inscrit ?
+        <a th:href="@{/login}">Se connecter</a>
+    </p>
+
+</body>
+
+</html>
