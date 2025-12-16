@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -50,6 +51,21 @@
 
         .header-user span {
             font-size: 14px;
+        }
+
+        .btn-logout {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: #c0392b;
         }
 
         /* MAIN CONTAINER */
@@ -115,6 +131,32 @@
             color: #7f8c8d;
             margin-bottom: 30px;
             font-size: 14px;
+        }
+
+        /* ADMIN BUTTONS */
+        .admin-actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
 
         /* STATS CARDS */
@@ -191,6 +233,11 @@
             border-bottom: 2px solid #ecf0f1;
         }
 
+        /* BADGES */
+        .badge-red { background: #fee; color: #e74c3c; }
+        .badge-yellow { background: #fef3cd; color: #f39c12; }
+        .badge-green { background: #d4edda; color: #27ae60; }
+
         /* FOOTER */
         .footer {
             background: white;
@@ -227,7 +274,10 @@
 <div class="header">
     <h1>🏙️ Gestion des Incidents - Ville Intelligente</h1>
     <div class="header-user">
-        <span>👤 Utilisateur</span>
+        <span sec:authentication="name">👤 Utilisateur</span>
+        <form th:action="@{/logout}" method="post" style="display: inline;">
+            <button type="submit" class="btn-logout">🚪 Déconnexion</button>
+        </form>
     </div>
 </div>
 
@@ -237,46 +287,73 @@
     <!-- SIDEBAR -->
     <aside class="sidebar">
         <ul class="sidebar-menu">
-            <li>
-                <a href="#" class="active">
+            <!-- Dashboard - Selon le rôle -->
+            <li sec:authorize="hasRole('SUPER_ADMIN')">
+                <a th:href="@{/super-admin/dashboard}" class="active">
                     <span class="icon">📊</span>
                     <span>Tableau de bord</span>
                 </a>
             </li>
-            <li>
+            <li sec:authorize="hasRole('ADMIN')">
+                <a th:href="@{/admin/dashboard}" class="active">
+                    <span class="icon">📊</span>
+                    <span>Tableau de bord</span>
+                </a>
+            </li>
+            <li sec:authorize="hasRole('AGENT')">
+                <a th:href="@{/agent/dashboard}" class="active">
+                    <span class="icon">📊</span>
+                    <span>Tableau de bord</span>
+                </a>
+            </li>
+            <li sec:authorize="hasRole('CITIZEN')">
+                <a th:href="@{/citoyen/dashboard}" class="active">
+                    <span class="icon">📊</span>
+                    <span>Tableau de bord</span>
+                </a>
+            </li>
+            
+            <!-- MENU SUPER_ADMIN -->
+            <li sec:authorize="hasRole('SUPER_ADMIN')">
+                <a th:href="@{/super-admin/create-user}">
+                    <span class="icon">👤</span>
+                    <span>Créer utilisateur</span>
+                </a>
+            </li>
+            <li sec:authorize="hasRole('SUPER_ADMIN')">
+                <a th:href="@{/super-admin/create-departement}">
+                    <span class="icon">🏢</span>
+                    <span>Créer département</span>
+                </a>
+            </li>
+            
+            <!-- MENU CITIZEN -->
+            <li sec:authorize="hasRole('CITIZEN')">
                 <a th:href="@{/incident/declarer}">
                     <span class="icon">➕</span>
                     <span>Déclarer un incident</span>
                 </a>
             </li>
-            <li>
+            
+            <!-- Liste incidents (PAS pour CITIZEN) -->
+            <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN', 'AGENT')">
                 <a th:href="@{/incidents/liste}">
                     <span class="icon">📋</span>
                     <span>Liste des incidents</span>
                 </a>
             </li>
-            <li>
-                <a href="#">
-                    <span class="icon">📈</span>
-                    <span>Statistiques</span>
-                </a>
-            </li>
-            <li>
+            
+            <!-- EXPORTS (SUPER_ADMIN & ADMIN) -->
+            <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN')">
                 <a th:href="@{/export/csv}">
                     <span class="icon">📥</span>
                     <span>Export CSV</span>
                 </a>
             </li>
-            <li>
+            <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN')">
                 <a th:href="@{/export/pdf}">
                     <span class="icon">📄</span>
                     <span>Export PDF</span>
-                </a>
-            </li>
-            <li>
-                <a href="#">
-                    <span class="icon">⚙️</span>
-                    <span>Paramètres</span>
                 </a>
             </li>
         </ul>
@@ -284,63 +361,430 @@
 
     <!-- CONTENT -->
     <main class="content">
-        <h2 class="page-title">Tableau de bord</h2>
-        <p class="page-subtitle">Vue d'ensemble des incidents signalés dans la ville</p>
+        
+        <!-- ========================================= -->
+        <!-- SECTION SUPER_ADMIN -->
+        <!-- ========================================= -->
+        <div sec:authorize="hasRole('SUPER_ADMIN')">
+            <h2 class="page-title">Tableau de bord Super Admin</h2>
+            <p class="page-subtitle">Vue d'ensemble complète de la plateforme</p>
 
-        <!-- STATS CARDS -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-label">Total des incidents</span>
-                    <span class="stat-icon">📋</span>
-                </div>
-                <div class="stat-value" th:text="${totalIncidents}">0</div>
+            <!-- Boutons d'action -->
+            <div class="admin-actions">
+                <a th:href="@{/super-admin/create-user}" class="btn-primary">
+                    ➕ Créer un utilisateur
+                </a>
+                <a th:href="@{/super-admin/create-departement}" class="btn-primary">
+                    🏢 Créer un département
+                </a>
             </div>
-            
-            <div class="stat-card red">
-                <div class="stat-header">
-                    <span class="stat-label">Signalés</span>
-                    <span class="stat-icon">🔴</span>
+
+            <!-- Stats complètes -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Total des incidents</span>
+                        <span class="stat-icon">📋</span>
+                    </div>
+                    <div class="stat-value" th:text="${totalIncidents}">0</div>
                 </div>
-                <div class="stat-value" th:text="${statsStatut['SIGNALE']}">0</div>
+                
+                <div class="stat-card red">
+                    <div class="stat-header">
+                        <span class="stat-label">Signalés</span>
+                        <span class="stat-icon">🔴</span>
+                    </div>
+                    <div class="stat-value" th:text="${statsStatut['SIGNALE']}">0</div>
+                </div>
+                
+                <div class="stat-card yellow">
+                    <div class="stat-header">
+                        <span class="stat-label">En résolution</span>
+                        <span class="stat-icon">🟡</span>
+                    </div>
+                    <div class="stat-value" th:text="${statsStatut['EN_RESOLUTION']}">0</div>
+                </div>
+                
+                <div class="stat-card green">
+                    <div class="stat-header">
+                        <span class="stat-label">Résolus</span>
+                        <span class="stat-icon">🟢</span>
+                    </div>
+                    <div class="stat-value" th:text="${statsStatut['RESOLU']}">0</div>
+                </div>
             </div>
+                    <!-- ✅ NOUVELLE SECTION : Cartes d'accès rapide -->
+            <h3 style="color: #2c3e50; margin-top: 40px; margin-bottom: 20px; font-size: 22px;">📊 Gestion de la plateforme</h3>
             
-            <div class="stat-card yellow">
-                <div class="stat-header">
-                    <span class="stat-label">En résolution</span>
-                    <span class="stat-icon">🟡</span>
+            <div class="stats-grid">
+                <!-- Carte Utilisateurs -->
+                <div class="stat-card" style="border-left-color: #3498db; cursor: pointer;" onclick="window.location.href='/super-admin/utilisateurs'">
+                    <div class="stat-header">
+                        <span class="stat-label">👥 Tous les utilisateurs</span>
+                        <span class="stat-icon">→</span>
+                    </div>
+                    <div class="stat-value" th:text="${totalUtilisateurs ?: 0}">0</div>
+                    <p style="font-size: 12px; color: #7f8c8d; margin-top: 10px;">Cliquez pour voir la liste complète</p>
                 </div>
-                <div class="stat-value" th:text="${statsStatut['EN_RESOLUTION']}">0</div>
+                
+                <!-- Carte Départements -->
+                <div class="stat-card" style="border-left-color: #9b59b6; cursor: pointer;" onclick="window.location.href='/super-admin/departements'">
+                    <div class="stat-header">
+                        <span class="stat-label">🏢 Départements</span>
+                        <span class="stat-icon">→</span>
+                    </div>
+                    <div class="stat-value" th:text="${totalDepartements ?: 0}">0</div>
+                    <p style="font-size: 12px; color: #7f8c8d; margin-top: 10px;">Cliquez pour voir la liste complète</p>
+                </div>
+                
+                <!-- Carte Incidents -->
+                <div class="stat-card" style="border-left-color: #e67e22; cursor: pointer;" onclick="window.location.href='/incidents/liste'">
+                    <div class="stat-header">
+                        <span class="stat-label">📋 Tous les incidents</span>
+                        <span class="stat-icon">→</span>
+                    </div>
+                    <div class="stat-value" th:text="${totalIncidents}">0</div>
+                    <p style="font-size: 12px; color: #7f8c8d; margin-top: 10px;">Cliquez pour voir la liste complète</p>
+                </div>
             </div>
-            
-            <div class="stat-card green">
-                <div class="stat-header">
-                    <span class="stat-label">Résolus</span>
-                    <span class="stat-icon">🟢</span>
+
+            <!-- Graphiques -->
+            <div class="charts-container">
+                <div class="chart-card">
+                    <h3 class="chart-title">📊 Répartition par statut</h3>
+                    <canvas id="chartStatut"></canvas>
                 </div>
-                <div class="stat-value" th:text="${statsStatut['RESOLU']}">0</div>
+
+                <div class="chart-card">
+                    <h3 class="chart-title">📈 Répartition par catégorie</h3>
+                    <canvas id="chartCategorie"></canvas>
+                </div>
+                
+                <div class="chart-card">
+                    <h3 class="chart-title">🏘️ Top 5 Quartiers</h3>
+                    <canvas id="chartQuartiers"></canvas>
+                </div>
             </div>
         </div>
 
-        <!-- CHARTS -->
-        <div class="charts-container">
-            <!-- Graphique par statut -->
-            <div class="chart-card">
-                <h3 class="chart-title">📊 Répartition par statut</h3>
-                <canvas id="chartStatut"></canvas>
+        <!-- ========================================= -->
+        <!-- SECTION ADMIN -->
+        <!-- ========================================= -->
+        <div sec:authorize="hasRole('ADMIN')">
+            <h2 class="page-title">Tableau de bord Administrateur</h2>
+            <p class="page-subtitle">Gestion de votre département</p>
+            <!-- Département -->
+            <div class="chart-card" style="margin-bottom: 20px;">
+                <h3 class="chart-title">🏢 Votre département</h3>
+                <p style="font-size: 18px; color: #2c3e50;">
+                    <strong th:text="${departement?.nom ?: 'Aucun département assigné'}">Département</strong>
+                </p>
             </div>
 
-            <!-- Graphique par catégorie -->
-            <div class="chart-card">
-                <h3 class="chart-title">📈 Répartition par catégorie</h3>
-                <canvas id="chartCategorie"></canvas>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Incidents de mon département</span>
+                        <span class="stat-icon">📋</span>
+                    </div>
+                    <div class="stat-value" th:text="${totalIncidents}">0</div>
+                </div>
+            
+
+            <div class="stat-card" style="border-left-color: #9b59b6;">
+            <div class="stat-header">
+                <span class="stat-label">Agents du département</span>
+                <span class="stat-icon">👥</span>
             </div>
-            <!-- Graphique Top Quartiers -->
-            <div class="chart-card">
-                <h3 class="chart-title">🏘️ Top 5 Quartiers</h3>
-                <canvas id="chartQuartiers"></canvas>
+            <div class="stat-value" th:text="${mesAgents?.size() ?: 0}">0</div>
+        </div>
+        
+        <div class="stat-card red">
+            <div class="stat-header">
+                <span class="stat-label">Non assignés</span>
+                <span class="stat-icon">🔴</span>
+            </div>
+            <div class="stat-value" th:text="${statsStatut['SIGNALE'] ?: 0}">0</div>
+        </div>
+        
+        <div class="stat-card yellow">
+            <div class="stat-header">
+                <span class="stat-label">En cours</span>
+                <span class="stat-icon">🟡</span>
+            </div>
+            <div class="stat-value" th:text="${(statsStatut['PRIS_EN_CHARGE'] ?: 0) + (statsStatut['EN_RESOLUTION'] ?: 0)}">0</div>
+        </div>
+    </div>
+
+    <!-- Liste des agents -->
+    <div class="chart-card" style="margin-top: 20px;">
+        <h3 class="chart-title">👥 Mes agents</h3>
+        
+        <table th:if="${mesAgents != null && !mesAgents.isEmpty()}" style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #ecf0f1; text-align: left;">
+                    <th style="padding: 12px; border-bottom: 2px solid #bdc3c7;">Nom</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #bdc3c7;">Email</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #bdc3c7;">Statut</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="agent : ${mesAgents}" style="border-bottom: 1px solid #ecf0f1;">
+                    <td style="padding: 12px;" th:text="${agent.prenom + ' ' + agent.nom}">Nom</td>
+                    <td style="padding: 12px;" th:text="${agent.email}">Email</td>
+                    <td style="padding: 12px;">
+                        <span th:if="${agent.actif}" style="background: #d4edda; color: #28a745; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">✅ Actif</span>
+                        <span th:unless="${agent.actif}" style="background: #f8d7da; color: #dc3545; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">❌ Inactif</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div th:if="${mesAgents == null || mesAgents.isEmpty()}" style="text-align: center; padding: 40px; color: #95a5a6;">
+            <p style="font-size: 18px;">Aucun agent dans votre département.</p>
+        </div>
+    </div>
+
+    <!-- Liste des incidents -->
+    <div class="chart-card" style="margin-top: 20px;">
+        <h3 class="chart-title">📋 Incidents du département</h3>
+        
+        <table th:if="${mesIncidents != null && !mesIncidents.isEmpty()}" style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #ecf0f1; text-align: left;">
+                    <th style="padding: 12px; border-bottom: 2px solid #bdc3c7;">Titre</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #bdc3c7;">Date</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #bdc3c7;">Statut</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #bdc3c7;">Agent</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #bdc3c7;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="incident : ${mesIncidents}" style="border-bottom: 1px solid #ecf0f1;">
+                    <td style="padding: 12px;" th:text="${incident.titre}">Titre</td>
+                    <td style="padding: 12px;" th:text="${#temporals.format(incident.dateDeclaration, 'dd/MM/yyyy')}">Date</td>
+                    <td style="padding: 12px;">
+                        <span th:if="${incident.statut != null && incident.statut.name() == 'SIGNALE'}" style="background: #fee; color: #e74c3c; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">🔴 Signalé</span>
+                        <span th:if="${incident.statut != null && incident.statut.name() == 'PRIS_EN_CHARGE'}" style="background: #e3f2fd; color: #2196f3; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">🔵 Pris en charge</span>
+                        <span th:if="${incident.statut != null && incident.statut.name() == 'EN_RESOLUTION'}" style="background: #fef3cd; color: #f39c12; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">🟡 En résolution</span>
+                        <span th:if="${incident.statut != null && incident.statut.name() == 'RESOLU'}" style="background: #d4edda; color: #28a745; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">🟢 Résolu</span>
+                    </td>
+                    <td style="padding: 12px;" th:text="${incident.agentAssigne != null ? incident.agentAssigne.prenom + ' ' + incident.agentAssigne.nom : 'Non assigné'}">Agent</td>
+                    <td style="padding: 12px;">
+                        <a th:href="@{/incident/{id}(id=${incident.id})}" 
+                           style="background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 5px; text-decoration: none; display: inline-block;">
+                            👁️ Voir
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div th:if="${mesIncidents == null || mesIncidents.isEmpty()}" style="text-align: center; padding: 40px; color: #95a5a6;">
+            <p style="font-size: 18px;">Aucun incident dans votre département.</p>
+        </div>
+    </div>
+</div>
+        </div>
+
+        <!-- ========================================= -->
+        <!-- SECTION AGENT -->
+        <!-- ========================================= -->
+        <div sec:authorize="hasRole('AGENT')">
+            <h2 class="page-title">Tableau de bord Agent</h2>
+            <p class="page-subtitle">Incidents qui vous sont assignés</p>
+
+            <!-- Affichage du département -->
+            <div class="chart-card" style="margin-bottom: 20px;" th:if="${agent.departement != null}">
+                <h3 class="chart-title">🏢 Votre département</h3>
+                <p style="font-size: 18px; color: #2c3e50;">
+                    <strong th:text="${agent.departement.nom}">Département</strong>
+                </p>
+            </div>
+
+            <!-- Stats personnalisées -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Incidents assignés</span>
+                        <span class="stat-icon">📋</span>
+                    </div>
+                    <div class="stat-value" th:text="${totalIncidents}">0</div>
+                </div>
+                
+                <div class="stat-card red">
+                    <div class="stat-header">
+                        <span class="stat-label">À traiter</span>
+                        <span class="stat-icon">🔴</span>
+                    </div>
+                    <div class="stat-value" th:text="${(statsStatut['SIGNALE'] ?: 0) + (statsStatut['PRIS_EN_CHARGE'] ?: 0)}">0</div>
+                </div>
+                
+                <div class="stat-card yellow">
+                    <div class="stat-header">
+                        <span class="stat-label">En résolution</span>
+                        <span class="stat-icon">🟡</span>
+                    </div>
+                    <div class="stat-value" th:text="${statsStatut['EN_RESOLUTION'] ?: 0}">0</div>
+                </div>
+                
+                <div class="stat-card green">
+                    <div class="stat-header">
+                        <span class="stat-label">Résolus</span>
+                        <span class="stat-icon">🟢</span>
+                    </div>
+                    <div class="stat-value" th:text="${(statsStatut['RESOLU'] ?: 0) + (statsStatut['CLOTURE'] ?: 0)}">0</div>
+                </div>
+            </div>
+
+            <!-- Liste des incidents de l'agent -->
+            <div class="chart-card" style="margin-top: 20px;">
+                <h3 class="chart-title">📋 Mes incidents assignés</h3>
+                
+                <div th:if="${mesIncidents.isEmpty()}" style="text-align: center; padding: 40px; color: #95a5a6;">
+                    <p style="font-size: 18px;">Aucun incident ne vous est assigné pour le moment.</p>
+                </div>
+                
+                <table th:if="${!mesIncidents.isEmpty()}" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #ecf0f1; text-align: left;">
+                            <th style="padding: 12px; border-bottom: 2px solid #bdc3c7;">Titre</th>
+                            <th style="padding: 12px; border-bottom: 2px solid #bdc3c7;">Catégorie</th>
+                            <th style="padding: 12px; border-bottom: 2px solid #bdc3c7;">Date</th>
+                            <th style="padding: 12px; border-bottom: 2px solid #bdc3c7;">Priorité</th>
+                            <th style="padding: 12px; border-bottom: 2px solid #bdc3c7;">Statut</th>
+                            <th style="padding: 12px; border-bottom: 2px solid #bdc3c7;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="incident : ${mesIncidents}" style="border-bottom: 1px solid #ecf0f1;">
+                            <td style="padding: 12px;" th:text="${incident.titre}">Titre</td>
+                            <td style="padding: 12px;" th:text="${incident.categorie?.nom}">Catégorie</td>
+                            <td style="padding: 12px;" th:text="${#temporals.format(incident.dateDeclaration, 'dd/MM/yyyy')}">Date</td>
+                            <td style="padding: 12px;">
+                                <span th:text="${incident.priorite == 1 ? '🟢 Faible' : 
+                                                incident.priorite == 2 ? '🟡 Moyenne' : 
+                                                incident.priorite == 3 ? '🟠 Haute' : 
+                                                '🔴 Critique'}">Priorité</span>
+                            </td>
+                            <td style="padding: 12px;">
+                                <span th:if="${incident.statut == null}" style="color: #999;">Non défini</span>
+                                <span th:if="${incident.statut != null && incident.statut.name() == 'SIGNALE'}" style="background: #fee; color: #e74c3c; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">🔴 Signalé</span>
+                                <span th:if="${incident.statut != null && incident.statut.name() == 'PRIS_EN_CHARGE'}" style="background: #e3f2fd; color: #2196f3; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">🔵 Pris en charge</span>
+                                <span th:if="${incident.statut != null && incident.statut.name() == 'EN_RESOLUTION'}" style="background: #fef3cd; color: #f39c12; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">🟡 En résolution</span>
+                                <span th:if="${incident.statut != null && incident.statut.name() == 'RESOLU'}" style="background: #d4edda; color: #28a745; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">🟢 Résolu</span>
+                                <span th:if="${incident.statut != null && incident.statut.name() == 'CLOTURE'}" style="background: #e8f5e9; color: #4caf50; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">✅ Clôturé</span>
+                            </td>
+                            <td style="padding: 12px;">
+                                <a th:href="@{/incident/{id}(id=${incident.id})}" 
+                                style="background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 5px; text-decoration: none; display: inline-block;">
+                                    👁️ Voir / Modifier
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
+
+        <!-- ========================================= -->
+        <!-- SECTION CITIZEN -->
+        <!-- ========================================= -->
+        <div sec:authorize="hasRole('CITIZEN')">
+            <h2 class="page-title">Tableau de bord Citoyen</h2>
+            <p class="page-subtitle">Vos incidents déclarés</p>
+
+            <!-- Bouton de déclaration -->
+            <div class="admin-actions">
+                <a th:href="@{/incident/declarer}" class="btn-primary">
+                    ➕ Déclarer un nouvel incident
+                </a>
+            </div>
+
+            <!-- Stats personnalisées -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Mes incidents</span>
+                        <span class="stat-icon">📋</span>
+                    </div>
+                    <div class="stat-value" th:text="${totalIncidents}">0</div>
+                </div>
+                
+                <div class="stat-card red">
+                    <div class="stat-header">
+                        <span class="stat-label">En attente</span>
+                        <span class="stat-icon">🔴</span>
+                    </div>
+                    <div class="stat-value" th:text="${statsStatut['SIGNALE'] ?: 0}">0</div>
+                </div>
+                
+                <div class="stat-card yellow">
+                    <div class="stat-header">
+                        <span class="stat-label">En cours</span>
+                        <span class="stat-icon">🟡</span>
+                    </div>
+                    <div class="stat-value" th:text="${(statsStatut['PRIS_EN_CHARGE'] ?: 0) + (statsStatut['EN_RESOLUTION'] ?: 0)}">0</div>
+                </div>
+                
+                <div class="stat-card green">
+                    <div class="stat-header">
+                        <span class="stat-label">Résolus</span>
+                        <span class="stat-icon">🟢</span>
+                    </div>
+                    <div class="stat-value" th:text="${(statsStatut['RESOLU'] ?: 0) + (statsStatut['CLOTURE'] ?: 0)}">0</div>
+                </div>
+            </div>
+
+            <!-- Liste des incidents du citoyen -->
+            <div class="chart-card" style="margin-top: 20px;">
+                <h3 class="chart-title">📋 Historique de mes incidents</h3>
+                
+                <div th:if="${mesIncidents.isEmpty()}" style="text-align: center; padding: 40px; color: #95a5a6;">
+                    <p style="font-size: 18px;">Vous n'avez déclaré aucun incident pour le moment.</p>
+                    <a th:href="@{/incident/declarer}" class="btn-primary" style="margin-top: 15px;">
+                        ➕ Déclarer votre premier incident
+                    </a>
+                </div>
+                
+                <table th:if="${!mesIncidents.isEmpty()}" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #ecf0f1; text-align: left;">
+                            <th style="padding: 12px; border-bottom: 2px solid #bdc3c7;">Titre</th>
+                            <th style="padding: 12px; border-bottom: 2px solid #bdc3c7;">Catégorie</th>
+                            <th style="padding: 12px; border-bottom: 2px solid #bdc3c7;">Date</th>
+                            <th style="padding: 12px; border-bottom: 2px solid #bdc3c7;">Statut</th>
+                            <th style="padding: 12px; border-bottom: 2px solid #bdc3c7;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="incident : ${mesIncidents}" style="border-bottom: 1px solid #ecf0f1;">
+                            <td style="padding: 12px;" th:text="${incident.titre}">Titre</td>
+                            <td style="padding: 12px;" th:text="${incident.categorie?.nom}">Catégorie</td>
+                            <td style="padding: 12px;" th:text="${#temporals.format(incident.dateDeclaration, 'dd/MM/yyyy')}">Date</td>
+                            <td style="padding: 12px;">
+                                <span th:if="${incident.statut != null}" 
+                                    th:text="${incident.statut.name()}"
+                                    th:style="${incident.statut.name() == 'SIGNALE' ? 'background: #fee; color: #e74c3c; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;' : 
+                                                incident.statut.name() == 'PRIS_EN_CHARGE' ? 'background: #e3f2fd; color: #2196f3; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;' :
+                                                incident.statut.name() == 'EN_RESOLUTION' ? 'background: #fef3cd; color: #f39c12; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;' :
+                                                incident.statut.name() == 'RESOLU' ? 'background: #d4edda; color: #28a745; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;' :
+                                                'background: #e8f5e9; color: #4caf50; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;'}">
+                                </span>
+                                <span th:if="${incident.statut == null}" style="color: #999;">Non défini</span>
+                            </td>
+                            <td style="padding: 12px;">
+                                <a th:href="@{/incident/{id}(id=${incident.id})}" 
+                                   style="background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 5px; text-decoration: none; display: inline-block;">
+                                    Voir
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </main>
 </div>
 
@@ -350,11 +794,13 @@
 </footer>
 
 <script th:inline="javascript">
-    // Données du serveur
+    // ✅ Graphiques uniquement pour SUPER_ADMIN
+    /*[# th:if="${#authorization.expression('hasRole(''SUPER_ADMIN'')')}"]*/
+    
     const statsStatut = /*[[${statsStatut}]]*/ {};
     const statsCategorie = /*[[${statsCategorie}]]*/ {};
+    const statsQuartiers = /*[[${statsQuartiers}]]*/ {};
 
-    // Graphique par statut
     const ctxStatut = document.getElementById('chartStatut').getContext('2d');
     new Chart(ctxStatut, {
         type: 'doughnut',
@@ -368,34 +814,17 @@
                     statsStatut['RESOLU'] || 0,
                     statsStatut['CLOTURE'] || 0
                 ],
-                backgroundColor: [
-                    '#e74c3c',
-                    '#3498db',
-                    '#f39c12',
-                    '#27ae60',
-                    '#9b59b6'
-                ],
+                backgroundColor: ['#e74c3c', '#3498db', '#f39c12', '#27ae60', '#9b59b6'],
                 borderWidth: 0
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: true,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 15,
-                        font: {
-                            size: 12
-                        }
-                    }
-                }
-            }
+            plugins: { legend: { position: 'bottom' } }
         }
     });
 
-    // Graphique par catégorie
     const ctxCategorie = document.getElementById('chartCategorie').getContext('2d');
     new Chart(ctxCategorie, {
         type: 'bar',
@@ -410,47 +839,31 @@
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        precision: 0
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
+            scales: { y: { beginAtZero: true } },
+            plugins: { legend: { display: false } }
         }
     });
-    const statsQuartiers = /*[[${statsQuartiers}]]*/ {};
 
-const ctxQuartiers = document.getElementById('chartQuartiers').getContext('2d');
-new Chart(ctxQuartiers, {
-    type: 'bar',
-    data: {
-        labels: Object.keys(statsQuartiers),
-        datasets: [{
-            label: 'Nombre d\'incidents',
-            data: Object.values(statsQuartiers),
-            backgroundColor: '#e74c3c',
-            borderRadius: 5
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        indexAxis: 'y',
-        scales: {
-            x: {
-                beginAtZero: true
-            }
+    const ctxQuartiers = document.getElementById('chartQuartiers').getContext('2d');
+    new Chart(ctxQuartiers, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(statsQuartiers),
+            datasets: [{
+                label: 'Nombre d\'incidents',
+                data: Object.values(statsQuartiers),
+                backgroundColor: '#e74c3c',
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            indexAxis: 'y',
+            scales: { x: { beginAtZero: true } }
         }
-    }
-});
+    });
+    
+    /*[/]*/
 </script>
 
 </body>

@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liste des Incidents - Gestion des Incidents</title>
-
+    <title>Liste des Utilisateurs - Gestion des Incidents</title>
+    
     <style>
         * {
             margin: 0;
@@ -90,10 +90,29 @@
             overflow-y: auto;
         }
 
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
         .page-title {
             font-size: 28px;
             color: #2c3e50;
-            margin-bottom: 30px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
         }
 
         /* FILTERS */
@@ -109,11 +128,9 @@
             display: flex;
             gap: 15px;
             align-items: center;
-            flex-wrap: wrap;
         }
 
-        .filter-group select,
-        .filter-group input {
+        .filter-group select {
             padding: 10px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
@@ -127,7 +144,6 @@
             padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
-            font-weight: 600;
         }
 
         .btn-reset {
@@ -139,7 +155,6 @@
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
-            font-weight: 600;
         }
 
         /* TABLE */
@@ -181,14 +196,15 @@
             border-radius: 12px;
             font-size: 12px;
             font-weight: 600;
-            display: inline-block;
         }
 
-        .badge-signale { background: #fee; color: #e74c3c; }
-        .badge-pris { background: #e3f2fd; color: #2196f3; }
-        .badge-resolution { background: #fef3cd; color: #f39c12; }
-        .badge-resolu { background: #d4edda; color: #28a745; }
-        .badge-cloture { background: #e8f5e9; color: #4caf50; }
+        .badge-citizen { background: #e3f2fd; color: #2196f3; }
+        .badge-agent { background: #fff3cd; color: #f39c12; }
+        .badge-admin { background: #fee; color: #e74c3c; }
+        .badge-superadmin { background: #e8f5e9; color: #4caf50; }
+        
+        .badge-actif { background: #d4edda; color: #28a745; }
+        .badge-inactif { background: #f8d7da; color: #dc3545; }
 
         .btn-action {
             background: #3498db;
@@ -211,12 +227,6 @@
             font-size: 14px;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
         }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                display: none;
-            }
-        }
     </style>
 </head>
 <body>
@@ -238,68 +248,49 @@
     <!-- SIDEBAR -->
     <aside class="sidebar">
         <ul class="sidebar-menu">
-            <!-- Dashboard selon le rôle -->
-            <li sec:authorize="hasRole('SUPER_ADMIN')">
+            <li>
                 <a th:href="@{/super-admin/dashboard}">
                     <span class="icon">📊</span>
                     <span>Tableau de bord</span>
                 </a>
             </li>
-            <li sec:authorize="hasRole('ADMIN')">
-                <a th:href="@{/admin/dashboard}">
-                    <span class="icon">📊</span>
-                    <span>Tableau de bord</span>
-                </a>
-            </li>
-            <li sec:authorize="hasRole('AGENT')">
-                <a th:href="@{/agent/dashboard}">
-                    <span class="icon">📊</span>
-                    <span>Tableau de bord</span>
-                </a>
-            </li>
-            
-            <!-- SUPER_ADMIN : Gestion utilisateurs/départements -->
-            <li sec:authorize="hasRole('SUPER_ADMIN')">
-                <a th:href="@{/super-admin/utilisateurs}">
+            <li>
+                <a th:href="@{/super-admin/utilisateurs}" class="active">
                     <span class="icon">👥</span>
                     <span>Utilisateurs</span>
                 </a>
             </li>
-            <li sec:authorize="hasRole('SUPER_ADMIN')">
+            <li>
                 <a th:href="@{/super-admin/departements}">
                     <span class="icon">🏢</span>
                     <span>Départements</span>
                 </a>
             </li>
-            <li sec:authorize="hasRole('SUPER_ADMIN')">
+            <li>
                 <a th:href="@{/super-admin/create-user}">
                     <span class="icon">➕</span>
                     <span>Créer utilisateur</span>
                 </a>
             </li>
-            <li sec:authorize="hasRole('SUPER_ADMIN')">
+            <li>
                 <a th:href="@{/super-admin/create-departement}">
                     <span class="icon">🏢</span>
                     <span>Créer département</span>
                 </a>
             </li>
-            
-            <!-- Liste incidents (SUPER_ADMIN, ADMIN, AGENT) -->
-            <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN', 'AGENT')">
-                <a th:href="@{/incidents/liste}" class="active">
+            <li>
+                <a th:href="@{/incidents/liste}">
                     <span class="icon">📋</span>
                     <span>Liste des incidents</span>
                 </a>
             </li>
-            
-            <!-- EXPORTS (SUPER_ADMIN & ADMIN) -->
-            <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN')">
+            <li>
                 <a th:href="@{/export/csv}">
                     <span class="icon">📥</span>
                     <span>Export CSV</span>
                 </a>
             </li>
-            <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN')">
+            <li>
                 <a th:href="@{/export/pdf}">
                     <span class="icon">📄</span>
                     <span>Export PDF</span>
@@ -310,45 +301,25 @@
 
     <!-- CONTENT -->
     <main class="content">
-        <h2 class="page-title">📋 Liste des Incidents</h2>
+        <div class="page-header">
+            <h2 class="page-title">👥 Liste des Utilisateurs</h2>
+            <a th:href="@{/super-admin/create-user}" class="btn-primary">➕ Créer un Admin/Agents</a>
+        </div>
 
         <!-- FILTRES -->
         <div class="filters">
-            <form method="get" th:action="@{/incidents/liste}">
+            <form th:action="@{/super-admin/utilisateurs}" method="get">
                 <div class="filter-group">
-                    <select name="statut">
-                        <option value="">Tous les statuts</option>
-                        <option value="SIGNALE" th:selected="${param.statut != null && param.statut[0] == 'SIGNALE'}">🔴 Signalé</option>
-                        <option value="PRIS_EN_CHARGE" th:selected="${param.statut != null && param.statut[0] == 'PRIS_EN_CHARGE'}">🔵 Pris en charge</option>
-                        <option value="EN_RESOLUTION" th:selected="${param.statut != null && param.statut[0] == 'EN_RESOLUTION'}">🟡 En résolution</option>
-                        <option value="RESOLU" th:selected="${param.statut != null && param.statut[0] == 'RESOLU'}">🟢 Résolu</option>
-                        <option value="CLOTURE" th:selected="${param.statut != null && param.statut[0] == 'CLOTURE'}">✅ Clôturé</option>
+                    <label>Filtrer par rôle :</label>
+                    <select name="role">
+                        <option value="">Tous les rôles</option>
+                        <option value="ROLE_CITIZEN" th:selected="${roleFiltre == 'ROLE_CITIZEN'}">👤 Citoyens</option>
+                        <option value="ROLE_AGENT" th:selected="${roleFiltre == 'ROLE_AGENT'}">🛠️ Agents</option>
+                        <option value="ROLE_ADMIN" th:selected="${roleFiltre == 'ROLE_ADMIN'}">⚙️ Admins</option>
+                        <option value="ROLE_SUPER_ADMIN" th:selected="${roleFiltre == 'ROLE_SUPER_ADMIN'}">👑 Super Admins</option>
                     </select>
-                    
-                    <select name="categorie">
-                        <option value="">Toutes catégories</option>
-                        <option value="Infrastructure" th:selected="${param.categorie != null && param.categorie[0] == 'Infrastructure'}">🏗️ Infrastructure</option>
-                        <option value="Propreté" th:selected="${param.categorie != null && param.categorie[0] == 'Propreté'}">🧹 Propreté</option>
-                        <option value="Sécurité" th:selected="${param.categorie != null && param.categorie[0] == 'Sécurité'}">🚨 Sécurité</option>
-                        <option value="Éclairage" th:selected="${param.categorie != null && param.categorie[0] == 'Éclairage'}">💡 Éclairage</option>
-                        <option value="Transport" th:selected="${param.categorie != null && param.categorie[0] == 'Transport'}">🚌 Transport</option>
-                        <option value="Environnement" th:selected="${param.categorie != null && param.categorie[0] == 'Environnement'}">🌳 Environnement</option>
-                    </select>
-                    
-                    <select name="quartier">
-                        <option value="">Tous les quartiers</option>
-                        <option th:each="q : ${quartiers}" 
-                                th:value="${q.nom}" 
-                                th:text="${q.nom}"
-                                th:selected="${param.quartier != null && param.quartier[0] == q.nom}"></option>
-                    </select>
-                    
-                    <input type="date" name="dateDeclaration" 
-                           th:value="${param.dateDeclaration != null ? param.dateDeclaration[0] : ''}"
-                           placeholder="Date de déclaration">
-                    
                     <button type="submit" class="btn-filter">🔍 Filtrer</button>
-                    <a th:href="@{/incidents/liste}" class="btn-reset">🔄 Réinitialiser</a>
+                    <a th:href="@{/super-admin/utilisateurs}" class="btn-reset">🔄 Réinitialiser</a>
                 </div>
             </form>
         </div>
@@ -356,53 +327,50 @@
         <!-- TABLEAU -->
         <div class="table-container">
             <p style="margin-bottom: 15px; color: #7f8c8d;">
-                <strong th:text="${incidents.size()}">0</strong> incident(s) trouvé(s)
+                <strong th:text="${utilisateurs.size()}">0</strong> utilisateur(s) trouvé(s)
             </p>
 
             <table>
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Titre</th>
-                        <th>Catégorie</th>
-                        <th>Quartier</th>
-                        <th>Date</th>
-                        <th>Priorité</th>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Email</th>
+                        <th>Rôle</th>
+                        <th>Département</th>
                         <th>Statut</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="incident : ${incidents}">
-                        <td th:text="${incident.id}">1</td>
-                        <td th:text="${incident.titre}">Titre</td>
-                        <td th:text="${incident.categorie?.nom ?: 'Non défini'}">Catégorie</td>
-                        <td th:text="${incident.quartier?.nom ?: 'Non défini'}">Quartier</td>
-                        <td th:text="${#temporals.format(incident.dateDeclaration, 'dd/MM/yyyy HH:mm')}">Date</td>
+                    <tr th:each="user : ${utilisateurs}">
+                        <td th:text="${user.id}">1</td>
+                        <td th:text="${user.nom}">Nom</td>
+                        <td th:text="${user.prenom}">Prénom</td>
+                        <td th:text="${user.email}">email@example.com</td>
                         <td>
-                            <span th:text="${incident.priorite == 1 ? '🟢 Faible' : 
-                                            incident.priorite == 2 ? '🟡 Moyenne' : 
-                                            incident.priorite == 3 ? '🟠 Haute' : 
-                                            '🔴 Critique'}">Priorité</span>
+                            <span th:switch="${user.role.name()}" class="badge">
+                                <span th:case="'ROLE_CITIZEN'" class="badge badge-citizen">👤 Citoyen</span>
+                                <span th:case="'ROLE_AGENT'" class="badge badge-agent">🛠️ Agent</span>
+                                <span th:case="'ROLE_ADMIN'" class="badge badge-admin">⚙️ Admin</span>
+                                <span th:case="'ROLE_SUPER_ADMIN'" class="badge badge-superadmin">👑 Super Admin</span>
+                            </span>
+                        </td>
+                        <td th:text="${user.departement != null ? user.departement.nom : '-'}">-</td>
+                        <td>
+                            <span th:if="${user.actif}" class="badge badge-actif">✅ Actif</span>
+                            <span th:unless="${user.actif}" class="badge badge-inactif">❌ Inactif</span>
                         </td>
                         <td>
-                            <span th:if="${incident.statut != null && incident.statut.name() == 'SIGNALE'}" class="badge badge-signale">🔴 Signalé</span>
-                            <span th:if="${incident.statut != null && incident.statut.name() == 'PRIS_EN_CHARGE'}" class="badge badge-pris">🔵 Pris en charge</span>
-                            <span th:if="${incident.statut != null && incident.statut.name() == 'EN_RESOLUTION'}" class="badge badge-resolution">🟡 En résolution</span>
-                            <span th:if="${incident.statut != null && incident.statut.name() == 'RESOLU'}" class="badge badge-resolu">🟢 Résolu</span>
-                            <span th:if="${incident.statut != null && incident.statut.name() == 'CLOTURE'}" class="badge badge-cloture">✅ Clôturé</span>
-                        </td>
-                        <td>
-                            <a th:href="@{/incident/{id}(id=${incident.id})}" class="btn-action">
-                                👁️ Voir
-                            </a>
+                            <a href="#" class="btn-action">👁️ Voir</a>
                         </td>
                     </tr>
                 </tbody>
             </table>
 
-            <div th:if="${incidents.isEmpty()}" style="text-align: center; padding: 40px; color: #95a5a6;">
-                <p style="font-size: 18px;">Aucun incident trouvé avec ces filtres.</p>
+            <div th:if="${utilisateurs.isEmpty()}" style="text-align: center; padding: 40px; color: #95a5a6;">
+                <p style="font-size: 18px;">Aucun utilisateur trouvé.</p>
             </div>
         </div>
     </main>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -37,6 +38,21 @@
             font-weight: 600;
         }
 
+        .btn-logout {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: #c0392b;
+        }
+
         .main-container {
             display: flex;
             flex: 1;
@@ -64,8 +80,7 @@
             font-size: 15px;
         }
 
-        .sidebar-menu a:hover,
-        .sidebar-menu a.active {
+        .sidebar-menu a:hover {
             background: #3498db;
             color: white;
             border-left: 4px solid #2980b9;
@@ -95,6 +110,21 @@
             margin-bottom: 30px;
         }
 
+        .statut-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .statut-signale { background: #fee; color: #e74c3c; }
+        .statut-pris { background: #e3f2fd; color: #2196f3; }
+        .statut-resolution { background: #fff3cd; color: #f39c12; }
+        .statut-resolu { background: #d4edda; color: #28a745; }
+        .statut-cloture { background: #e8f5e9; color: #4caf50; }
+
         .info-row {
             margin-bottom: 20px;
             border-bottom: 1px solid #eee;
@@ -111,12 +141,102 @@
             max-width: 100%;
             border-radius: 8px;
             margin-top: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         #detailMap {
             height: 300px;
             margin-top: 20px;
             border-radius: 10px;
+            border: 2px solid #e0e0e0;
+        }
+
+        /* FEEDBACK SECTION */
+        .feedback-section {
+            background: #f8f9fa;
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .feedback-section.disabled {
+            background: #f5f5f5;
+            border-color: #ddd;
+            opacity: 0.6;
+        }
+
+        .feedback-section h3 {
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+
+        .feedback-section.disabled h3 {
+            color: #999;
+        }
+
+        .feedback-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .feedback-textarea:focus {
+            outline: none;
+            border-color: #28a745;
+        }
+
+        .feedback-textarea:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+
+        .btn-submit-feedback {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit-feedback:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-submit-feedback:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .feedback-info {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #856404;
+        }
+
+        .feedback-display {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
         }
 
         .btn-back {
@@ -128,6 +248,12 @@
             text-decoration: none;
             border-radius: 8px;
             font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
 
         .footer {
@@ -153,7 +279,10 @@
 <div class="header">
     <h1>🏙️ Gestion des Incidents - Ville Intelligente</h1>
     <div class="header-user">
-        <span>👤 Utilisateur</span>
+        <span sec:authentication="name">👤 Utilisateur</span>
+        <form th:action="@{/logout}" method="post" style="display: inline;">
+            <button type="submit" class="btn-logout">🚪 Déconnexion</button>
+        </form>
     </div>
 </div>
 
@@ -161,47 +290,100 @@
 <div class="main-container">
     
     <!-- SIDEBAR -->
-    <aside class="sidebar">
-        <ul class="sidebar-menu">
-            <li>
-                <a th:href="@{/dashboard}">
-                    <span class="icon">📊</span>
-                    <span>Tableau de bord</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/incident/declarer}">
-                    <span class="icon">➕</span>
-                    <span>Déclarer un incident</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/incidents/liste}">
-                    <span class="icon">📋</span>
-                    <span>Liste des incidents</span>
-                </a>
-            </li>
-            <li>
-                <a href="#">
-                    <span class="icon">📈</span>
-                    <span>Statistiques</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/export/csv}">
-                    <span class="icon">📥</span>
-                    <span>Export CSV</span>
-                </a>
-            </li>
-        </ul>
-    </aside>
+   <!-- SIDEBAR -->
+<aside class="sidebar">
+    <ul class="sidebar-menu">
+        <!-- Dashboard - Selon le rôle -->
+        <li sec:authorize="hasRole('SUPER_ADMIN')">
+            <a th:href="@{/super-admin/dashboard}">
+                <span class="icon">📊</span>
+                <span>Tableau de bord</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/dashboard}">
+                <span class="icon">📊</span>
+                <span>Tableau de bord</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('AGENT')">
+            <a th:href="@{/agent/dashboard}">
+                <span class="icon">📊</span>
+                <span>Tableau de bord</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('CITIZEN')">
+            <a th:href="@{/citoyen/dashboard}">
+                <span class="icon">📊</span>
+                <span>Tableau de bord</span>
+            </a>
+        </li>
+        
+        <!-- MENU SUPER_ADMIN -->
+        <li sec:authorize="hasRole('SUPER_ADMIN')">
+            <a th:href="@{/super-admin/create-user}">
+                <span class="icon">👤</span>
+                <span>Créer utilisateur</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('SUPER_ADMIN')">
+            <a th:href="@{/super-admin/create-departement}">
+                <span class="icon">🏢</span>
+                <span>Créer département</span>
+            </a>
+        </li>
+        
+        <!-- MENU CITIZEN -->
+        <li sec:authorize="hasRole('CITIZEN')">
+            <a th:href="@{/incident/declarer}">
+                <span class="icon">➕</span>
+                <span>Déclarer un incident</span>
+            </a>
+        </li>
+        
+        <!-- Liste incidents (PAS pour CITIZEN) -->
+        <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN', 'AGENT')">
+            <a th:href="@{/incidents/liste}">
+                <span class="icon">📋</span>
+                <span>Liste des incidents</span>
+            </a>
+        </li>
+        
+        <!-- EXPORTS (SUPER_ADMIN & ADMIN) -->
+        <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN')">
+            <a th:href="@{/export/csv}">
+                <span class="icon">📥</span>
+                <span>Export CSV</span>
+            </a>
+        </li>
+        <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN')">
+            <a th:href="@{/export/pdf}">
+                <span class="icon">📄</span>
+                <span>Export PDF</span>
+            </a>
+        </li>
+    </ul>
+</aside>
 
     <!-- CONTENT -->
     <main class="content">
         <div class="detail-container">
             <div class="success-header">
-                <h2>Incident  </h2>
+                <h2>📋 Détail de l'incident</h2>
                 <p>Référence : #<span th:text="${incident.id}"></span></p>
+                <span th:switch="${incident.statut.name()}" 
+                      th:classappend="${incident.statut.name() == 'SIGNALE' ? 'statut-signale' : 
+                                       incident.statut.name() == 'PRIS_EN_CHARGE' ? 'statut-pris' : 
+                                       incident.statut.name() == 'EN_RESOLUTION' ? 'statut-resolution' : 
+                                       incident.statut.name() == 'RESOLU' ? 'statut-resolu' : 
+                                       'statut-cloture'}"
+                      class="statut-badge">
+                    <span th:case="'SIGNALE'">🔴 Signalé</span>
+                    <span th:case="'PRIS_EN_CHARGE'">🔵 Pris en charge</span>
+                    <span th:case="'EN_RESOLUTION'">🟡 En résolution</span>
+                    <span th:case="'RESOLU'">🟢 Résolu</span>
+                    <span th:case="'CLOTURE'">✅ Clôturé</span>
+                </span>
             </div>
 
             <div class="info-row">
@@ -215,12 +397,22 @@
             </div>
 
             <div class="info-row">
+                <div class="label">🏷️ Catégorie</div>
+                <div th:text="${incident.categorie?.nom}">Non spécifiée</div>
+            </div>
+
+            <div class="info-row">
                 <div class="label">📍 Adresse</div>
                 <div th:text="${incident.adresse}"></div>
             </div>
 
             <div class="info-row">
-                <div class="label">📅 Date</div>
+                <div class="label">🏘️ Quartier</div>
+                <div th:text="${incident.quartier?.nom + ', ' + incident.quartier?.ville}">Non spécifié</div>
+            </div>
+
+            <div class="info-row">
+                <div class="label">📅 Date de déclaration</div>
                 <span th:text="${#temporals.format(incident.dateDeclaration,'dd/MM/yyyy HH:mm')}"></span>
             </div>
 
@@ -235,18 +427,60 @@
             <div th:if="${incident.photo != null}" class="photo-preview">
                 <div class="label">📸 Photo</div>
                 <img th:src="@{${incident.photo.chemin}}" alt="Photo incident">
-                <p th:text="${incident.photo.nomFichier}"></p>
             </div>
 
             <div th:if="${incident.photo == null}">
-                <p>📷 Aucune photo associée</p>
+                <p style="color: #999;">📷 Aucune photo associée</p>
             </div>
 
             <div id="detailMap"></div>
 
+            <!-- ========================================= -->
+            <!-- SECTION FEEDBACK CITOYEN -->
+            <!-- ========================================= -->
+            <div sec:authorize="hasRole('CITIZEN')" 
+                 th:classappend="${incident.statut.name() != 'RESOLU' ? 'disabled' : ''}"
+                 class="feedback-section">
+                
+                <h3>✅ Donner votre feedback</h3>
+                
+                <!-- Message si incident pas encore résolu -->
+                <div th:if="${incident.statut.name() != 'RESOLU' && incident.statut.name() != 'CLOTURE'}" class="feedback-info">
+                    ℹ️ Le feedback sera disponible une fois que l'incident sera marqué comme <strong>Résolu</strong> par les services municipaux.
+                </div>
+                
+                <!-- Message si déjà clôturé -->
+                <div th:if="${incident.statut.name() == 'CLOTURE'}" class="feedback-display">
+                    <strong>✅ Incident clôturé</strong>
+                    <p style="margin-top: 10px;">Votre feedback :</p>
+                    <p th:text="${incident.feedbackCitoyen}" style="font-style: italic; margin-top: 5px;"></p>
+                </div>
+                
+                <!-- Formulaire de feedback (actif si RESOLU) -->
+                <form th:if="${incident.statut.name() == 'RESOLU'}" 
+                      th:action="@{/incident/{id}/feedback(id=${incident.id})}" 
+                      method="post">
+                    
+                    <textarea name="feedbackCitoyen" 
+                              class="feedback-textarea"
+                              placeholder="Votre feedback sur la résolution de l'incident..."
+                              required
+                              th:disabled="${incident.statut.name() != 'RESOLU'}"></textarea>
+                    
+                    <button type="submit" 
+                            class="btn-submit-feedback"
+                            th:disabled="${incident.statut.name() != 'RESOLU'}">
+                        ✅ Soumettre le feedback et clôturer l'incident
+                    </button>
+                </form>
+            </div>
+
             <div style="text-align:center">
-                <a th:href="@{/incident/declarer}" class="btn-back">
-                    ← Déclarer un nouvel incident
+                <a th:href="@{/citoyen/dashboard}" class="btn-back" sec:authorize="hasRole('CITIZEN')">
+                    ← Retour au tableau de bord
+                </a>
+                <a th:href="@{/incidents/liste}" class="btn-back" sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN', 'AGENT')">
+                    ← Retour à la liste
                 </a>
             </div>
         </div>
@@ -271,7 +505,8 @@
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        L.marker([latitude, longitude]).addTo(map);
+        L.marker([latitude, longitude]).addTo(map)
+            .bindPopup('📍 Localisation de l\'incident');
     }
 </script>
 

@@ -3,10 +3,13 @@ package com.ville.intelligente.gestionincidents.metier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import com.ville.intelligente.gestionincidents.dao.IncidentDAO;
+import com.ville.intelligente.gestionincidents.model.Incident;
+import com.ville.intelligente.gestionincidents.model.Utilisateur;
 import com.ville.intelligente.gestionincidents.model.enums.StatutIncident;
 
 @Service
@@ -78,4 +81,46 @@ public class StatistiqueServiceImpl implements StatistiqueService {
         
         return stats;
     }
+    @Override
+public long compterIncidentsParCitoyen(Utilisateur citoyen) {
+    return incidentDao.findByCitoyen(citoyen).size();
+}
+
+@Override
+public Map<StatutIncident, Long> getStatistiquesParStatutPourCitoyen(Utilisateur citoyen) {
+    List<Incident> incidents = incidentDao.findByCitoyen(citoyen);
+    return incidents.stream()
+            .collect(Collectors.groupingBy(
+                    Incident::getStatut,
+                    Collectors.counting()
+            ));
+}
+
+@Override
+public long compterIncidentsParAgent(Utilisateur agent) {
+    return incidentDao.findByAgentAssigne(agent).size();
+}
+
+@Override
+public Map<StatutIncident, Long> getStatistiquesParStatutPourAgent(Utilisateur agent) {
+    List<Incident> incidents = incidentDao.findByAgentAssigne(agent);
+    return incidents.stream()
+            .collect(Collectors.groupingBy(
+                    Incident::getStatut,
+                    Collectors.counting()));
+}
+
+@Override
+public long compterIncidentsParDepartement(Long departementId) {
+    return (long) incidentDao.findByCategorie_Id(departementId).size();
+}
+
+@Override
+public Map<StatutIncident, Long> getStatistiquesParStatutPourDepartement(Long departementId) {
+    List<Incident> incidents = incidentDao.findByCategorie_Id(departementId);
+    return incidents.stream()
+            .collect(Collectors.groupingBy(
+                    Incident::getStatut,
+                    Collectors.counting()));
+}
 }
