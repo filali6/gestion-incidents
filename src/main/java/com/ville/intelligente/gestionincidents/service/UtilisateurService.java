@@ -79,6 +79,9 @@ public class UtilisateurService {
     // =========================
     // CREATION ADMIN / AGENT
     // =========================
+    // =========================
+    // CREATION ADMIN / AGENT avec envoi de mail
+    // =========================
     public Utilisateur creerUtilisateurParSuperAdmin(CreateAdminAgentRequest request) {
 
         if (request.getRole() == Role.ROLE_CITIZEN) {
@@ -96,12 +99,18 @@ public class UtilisateurService {
             throw new RuntimeException("Ce département possède déjà un administrateur");
         }
 
+        // Génération du mot de passe temporaire si non fourni
+        String motDePasse = request.getMotDePasse();
+        if (motDePasse == null || motDePasse.isEmpty()) {
+            motDePasse = UUID.randomUUID().toString().substring(0, 8); // mot de passe temporaire 8 caractères
+        }
+
         Utilisateur utilisateur = Utilisateur.builder()
                 .nom(request.getNom())
                 .prenom(request.getPrenom())
                 .email(request.getEmail())
                 .telephone(request.getTelephone())
-                .motDePasse(passwordEncoder.encode(request.getMotDePasse()))
+                .motDePasse(passwordEncoder.encode(motDePasse))
                 .role(request.getRole())
                 .dateInscription(LocalDateTime.now())
                 .actif(true)
@@ -116,6 +125,24 @@ public class UtilisateurService {
             departement.setAdmin(utilisateur);
             categorieIncidentDAO.save(departement);
         }
+
+        // =========================
+        // Envoi de mail avec identifiants
+        // =========================
+        String contenu = "<p>Bonjour " + utilisateur.getPrenom() + ",</p>" +
+                "<p>Votre compte a été créé sur la plateforme Gestion des Incidents.</p>" +
+                "<p>Voici vos identifiants pour vous connecter :</p>" +
+                "<ul>" +
+                "<li>Email : " + utilisateur.getEmail() + "</li>" +
+                "<li>Mot de passe : " + motDePasse + "</li>" +
+                "</ul>" +
+                "<p>Nous vous recommandons de changer votre mot de passe dès votre première connexion.</p>" +
+                "<p><a href=\"http://localhost:8080/login\">Se connecter</a></p>";
+
+        emailService.envoyerEmail(
+                utilisateur.getEmail(),
+                "Création de votre compte - Gestion des Incidents",
+                contenu);
 
         return utilisateur;
     }
