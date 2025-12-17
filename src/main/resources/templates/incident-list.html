@@ -360,18 +360,60 @@
             </p>
 
             <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Titre</th>
-                        <th>Catégorie</th>
-                        <th>Quartier</th>
-                        <th>Date</th>
-                        <th>Priorité</th>
-                        <th>Statut</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
+             <thead>
+    <tr>
+        <th>ID</th>
+        <th>
+            <a th:href="@{/incidents/liste(
+                page=${currentPage}, 
+                size=${pageSize}, 
+                sortBy='titre', 
+                sortDir=${sortBy == 'titre' ? reverseSortDir : 'asc'},
+                statut=${param.statut != null && param.statut[0] != '' ? param.statut[0] : null},
+                categorie=${param.categorie != null && param.categorie[0] != '' ? param.categorie[0] : null},
+                quartier=${param.quartier != null && param.quartier[0] != '' ? param.quartier[0] : null},
+                dateDeclaration=${param.dateDeclaration != null && param.dateDeclaration[0] != '' ? param.dateDeclaration[0] : null}
+            )}"
+               style="color: #2c3e50; text-decoration: none; cursor: pointer;">
+                Titre <span th:if="${sortBy == 'titre'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+            </a>
+        </th>
+        <th>Catégorie</th>
+        <th>Quartier</th>
+        <th>
+            <a th:href="@{/incidents/liste(
+                page=${currentPage}, 
+                size=${pageSize}, 
+                sortBy='dateDeclaration', 
+                sortDir=${sortBy == 'dateDeclaration' ? reverseSortDir : 'desc'},
+                statut=${param.statut != null && param.statut[0] != '' ? param.statut[0] : null},
+                categorie=${param.categorie != null && param.categorie[0] != '' ? param.categorie[0] : null},
+                quartier=${param.quartier != null && param.quartier[0] != '' ? param.quartier[0] : null},
+                dateDeclaration=${param.dateDeclaration != null && param.dateDeclaration[0] != '' ? param.dateDeclaration[0] : null}
+            )}"
+               style="color: #2c3e50; text-decoration: none; cursor: pointer;">
+                Date <span th:if="${sortBy == 'dateDeclaration'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+            </a>
+        </th>
+        <th>
+            <a th:href="@{/incidents/liste(
+                page=${currentPage}, 
+                size=${pageSize}, 
+                sortBy='priorite', 
+                sortDir=${sortBy == 'priorite' ? reverseSortDir : 'desc'},
+                statut=${param.statut != null && param.statut[0] != '' ? param.statut[0] : null},
+                categorie=${param.categorie != null && param.categorie[0] != '' ? param.categorie[0] : null},
+                quartier=${param.quartier != null && param.quartier[0] != '' ? param.quartier[0] : null},
+                dateDeclaration=${param.dateDeclaration != null && param.dateDeclaration[0] != '' ? param.dateDeclaration[0] : null}
+            )}"
+               style="color: #2c3e50; text-decoration: none; cursor: pointer;">
+                Priorité <span th:if="${sortBy == 'priorite'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+            </a>
+        </th>
+        <th>Statut</th>
+        <th>Actions</th>
+    </tr>
+</thead>
                 <tbody>
                     <tr th:each="incident : ${incidents}">
                         <td th:text="${incident.id}">1</td>
@@ -404,6 +446,37 @@
             <div th:if="${incidents.isEmpty()}" style="text-align: center; padding: 40px; color: #95a5a6;">
                 <p style="font-size: 18px;">Aucun incident trouvé avec ces filtres.</p>
             </div>
+            <!-- PAGINATION -->
+            <div th:if="${totalPages > 1}" style="margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 10px;">
+                
+                <!-- Bouton Précédent -->
+                <a th:if="${currentPage > 0}" 
+                th:href="@{/incidents/liste(page=${currentPage - 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, statut=${param.statut}, categorie=${param.categorie}, quartier=${param.quartier}, dateDeclaration=${param.dateDeclaration})}"
+                style="padding: 8px 16px; background: #3498db; color: white; border-radius: 5px; text-decoration: none;">
+                    ← Précédent
+                </a>
+                
+                <!-- Numéros de pages -->
+                <span style="color: #7f8c8d;">
+                    Page <strong th:text="${currentPage + 1}">1</strong> sur <strong th:text="${totalPages}">1</strong>
+                </span>
+                
+                <!-- Bouton Suivant -->
+                <a th:if="${currentPage < totalPages - 1}" 
+                th:href="@{/incidents/liste(page=${currentPage + 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, statut=${param.statut}, categorie=${param.categorie}, quartier=${param.quartier}, dateDeclaration=${param.dateDeclaration})}"
+                style="padding: 8px 16px; background: #3498db; color: white; border-radius: 5px; text-decoration: none;">
+                    Suivant →
+                </a>
+                
+                <!-- Sélecteur de taille -->
+                <select onchange="window.location.href='/incidents/liste?page=0&size=' + this.value + '&sortBy=' + '[[${sortBy}]]' + '&sortDir=' + '[[${sortDir}]]' + '&statut=' + '[[${param.statut}]]' + '&categorie=' + '[[${param.categorie}]]' + '&quartier=' + '[[${param.quartier}]]' + '&dateDeclaration=' + '[[${param.dateDeclaration}]]'"
+                        style="padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px;">
+                    <option value="10" th:selected="${pageSize == 10}">10 par page</option>
+                    <option value="20" th:selected="${pageSize == 20}">20 par page</option>
+                    <option value="50" th:selected="${pageSize == 50}">50 par page</option>
+                </select>
+            </div>
+
         </div>
     </main>
 </div>

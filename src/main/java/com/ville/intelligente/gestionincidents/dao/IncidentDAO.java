@@ -1,5 +1,7 @@
 package com.ville.intelligente.gestionincidents.dao;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -66,5 +68,22 @@ public interface IncidentDAO extends JpaRepository<Incident, Long> {
             @Param("categorie") String categorie,
             @Param("quartier") String quartier,
             @Param("dateDeclaration")  Date dateDeclaration);
+
+    Page<Incident> findAll(Pageable pageable);
+    
+    @Query("SELECT i FROM Incident i " +
+                    "LEFT JOIN i.categorie c " +
+                    "LEFT JOIN i.quartier q " +
+                    "WHERE (:statut IS NULL OR i.statut = :statut) " +
+                    "AND (:categorie IS NULL OR :categorie = '' OR c.nom = :categorie) " +
+                    "AND (:quartier IS NULL OR :quartier = '' OR q.nom = :quartier) " +
+                    "AND (:dateDeclaration IS NULL OR CAST(i.dateDeclaration AS date) = :dateDeclaration)")
+    Page<Incident> findByFiltersWithPageable(
+                    @Param("statut") StatutIncident statut,
+                    @Param("categorie") String categorie,
+                    @Param("quartier") String quartier,
+                    @Param("dateDeclaration") Date dateDeclaration,
+                    Pageable pageable);
+
 
     }
