@@ -16,8 +16,7 @@ public class DepartementService {
         this.categorieIncidentDAO = categorieIncidentDAO;
     }
 
-    // CREATION DEPARTEMENT
-    // (SUPER ADMIN)
+     
 
     public CategorieIncident creerDepartement(CreateDepartementRequest request) {
 
@@ -31,7 +30,7 @@ public class DepartementService {
         return categorieIncidentDAO.save(departement);
     }
 
-    // RECUPERATION
+   
 
     public List<CategorieIncident> findAll() {
         return categorieIncidentDAO.findAll();

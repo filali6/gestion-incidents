@@ -18,9 +18,9 @@ public class RoleBasedAuthenticationSuccessHandler implements AuthenticationSucc
             HttpServletResponse response,
             Authentication authentication) throws IOException, ServletException {
 
-        String redirectUrl = "/dashboard"; // Par défaut
+        String redirectUrl = "/dashboard";  
 
-        // Déterminer l'URL de redirection selon le rôle
+         
         if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_SUPER_ADMIN"))) {
             redirectUrl = "/super-admin/dashboard";
         } else if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
@@ -31,7 +31,7 @@ public class RoleBasedAuthenticationSuccessHandler implements AuthenticationSucc
             redirectUrl = "/citoyen/dashboard";
         }
 
-        // Rediriger vers l'URL appropriée
+        
         response.sendRedirect(redirectUrl);
     }
 }

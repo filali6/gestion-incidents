@@ -33,9 +33,7 @@ public class UtilisateurService {
         this.emailService = emailService;
     }
 
-    // =========================
-    // INSCRIPTION CITOYEN
-    // =========================
+    
     public Utilisateur inscrireCitoyen(RegisterRequest request) {
 
         if (!request.getMotDePasse().equals(request.getConfirmMotDePasse())) {
@@ -76,12 +74,7 @@ public class UtilisateurService {
         return utilisateur;
     }
 
-    // =========================
-    // CREATION ADMIN / AGENT
-    // =========================
-    // =========================
-    // CREATION ADMIN / AGENT avec envoi de mail
-    // =========================
+    
     public Utilisateur creerUtilisateurParSuperAdmin(CreateAdminAgentRequest request) {
 
         if (request.getRole() == Role.ROLE_CITIZEN) {
@@ -99,10 +92,10 @@ public class UtilisateurService {
             throw new RuntimeException("Ce département possède déjà un administrateur");
         }
 
-        // Génération du mot de passe temporaire si non fourni
+        
         String motDePasse = request.getMotDePasse();
         if (motDePasse == null || motDePasse.isEmpty()) {
-            motDePasse = UUID.randomUUID().toString().substring(0, 8); // mot de passe temporaire 8 caractères
+            motDePasse = UUID.randomUUID().toString().substring(0, 8);  
         }
 
         Utilisateur utilisateur = Utilisateur.builder()
@@ -126,9 +119,7 @@ public class UtilisateurService {
             categorieIncidentDAO.save(departement);
         }
 
-        // =========================
-        // Envoi de mail avec identifiants
-        // =========================
+     
         String contenu = "<p>Bonjour " + utilisateur.getPrenom() + ",</p>" +
                 "<p>Votre compte a été créé sur la plateforme Gestion des Incidents.</p>" +
                 "<p>Voici vos identifiants pour vous connecter :</p>" +
@@ -147,9 +138,7 @@ public class UtilisateurService {
         return utilisateur;
     }
 
-    // =========================
-    // VERIFICATION EMAIL
-    // =========================
+    
     public void verifierEmail(String token) {
         Utilisateur utilisateur = utilisateurRepository
                 .findByTokenVerificationEmail(token)
@@ -162,9 +151,7 @@ public class UtilisateurService {
         utilisateurRepository.save(utilisateur);
     }
 
-    // =========================
-    // RECHERCHE
-    // =========================
+     
     public Utilisateur findByEmail(String email) {
         return utilisateurRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
@@ -196,21 +183,13 @@ public class UtilisateurService {
         return utilisateurRepository.findByDepartementIdAndRole(departementId, Role.ROLE_AGENT);
     }
 
-    // =====================================================
-    // ===================== PROFIL ========================
-    // =====================================================
-
-    /**
-     * Récupérer le profil de l'utilisateur connecté
-     */
+    
     public Utilisateur getProfilUtilisateur(String emailConnecte) {
         return utilisateurRepository.findByEmail(emailConnecte)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
     }
 
-    /**
-     * Mise à jour du profil (infos personnelles)
-     */
+     
     public Utilisateur mettreAJourProfil(
             String emailConnecte,
             String nom,
@@ -226,9 +205,7 @@ public class UtilisateurService {
         return utilisateurRepository.save(utilisateur);
     }
 
-    /**
-     * Changement du mot de passe
-     */
+     
     public void changerMotDePasse(
             String emailConnecte,
             String ancienMotDePasse,
