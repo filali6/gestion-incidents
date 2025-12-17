@@ -47,17 +47,42 @@ public class IncidentController {
     @PostMapping("/save")
     public String saveIncident(
         Incident incident,
-        @RequestParam("photoFile") MultipartFile photoFile,@RequestParam("categorieNom") String categorieNom,      // ⭐ AJOUTE
-    @RequestParam("quartierNom") String quartierNom,@RequestParam("quartierVille") String quartierVille,        // ⭐ AJOUTE
-    @RequestParam("quartierCodePostal") int quartierCodePostal, @AuthenticationPrincipal UserDetails userDetails,RedirectAttributes redirectAttributes) 
+        @RequestParam("photoFile") MultipartFile photoFile,@RequestParam("categorieNom") String categorieNom,      
+    @RequestParam("quartierNom") String quartierNom,@RequestParam("quartierVille") String quartierVille,         
+    @RequestParam("quartierCodePostal") int quartierCodePostal, @AuthenticationPrincipal UserDetails userDetails,RedirectAttributes redirectAttributes, Model model) 
           {
               Utilisateur citoyen = utilisateurService.findByEmail(userDetails.getUsername());
               incident.setCitoyen(citoyen);
               incident.setPriorite(2);
 
+
+              
+               
+              if (photoFile != null && !photoFile.isEmpty()) {
+
+                  
+                  if (photoFile.getSize() > 5 * 1024 * 1024) {
+                      model.addAttribute("error", " La photo ne doit pas dépasser 5MB");
+                      model.addAttribute("incident", incident);
+                      return "incident-form";
+                  }
+
+                  // Vérifier le type de fichier
+                  String contentType = photoFile.getContentType();
+                  if (contentType == null ||
+                          (!contentType.equals("image/jpeg") &&
+                                  !contentType.equals("image/png") &&
+                                  !contentType.equals("image/jpg"))) {
+                      model.addAttribute("error", " Seuls les formats JPG, JPEG et PNG sont autorisés");
+                      model.addAttribute("incident", incident);
+                      return "incident-form";
+                  }
+              }
+
     Incident savedIncident =
             incidentService.saveIncidentWithPhoto(incident, photoFile, categorieNom, quartierNom, quartierVille,
                     quartierCodePostal);
+    redirectAttributes.addFlashAttribute("success", "✅ Incident déclaré avec succès !");
 
     return "redirect:/citoyen/dashboard"  ;
 }

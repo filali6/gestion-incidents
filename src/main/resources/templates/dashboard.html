@@ -223,6 +223,27 @@
     </style>
 </head>
 <body>
+    <div th:if="${success}" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px; animation: slideIn 0.3s ease-out;">
+    <div style="background:  #28a745 ; color: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 20px rgba(40, 167, 69, 0.3); display: flex; align-items: center; gap: 15px;">
+        <span style="font-size: 24px;"></span>
+        <div>
+            <strong style="display: block; font-size: 16px; margin-bottom: 5px;">Succès !</strong>
+            <span th:text="${success}" style="font-size: 14px;">Message</span>
+        </div>
+        <button onclick="this.parentElement.parentElement.remove()" style="margin-left: auto; background: none; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0;">×</button>
+    </div>
+</div>
+
+<div th:if="${error}" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px; animation: slideIn 0.3s ease-out;">
+    <div style="background:  #e74c3c ; color: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 20px rgba(231, 76, 60, 0.3); display: flex; align-items: center; gap: 15px;">
+        <span style="font-size: 24px;"></span>
+        <div>
+            <strong style="display: block; font-size: 16px; margin-bottom: 5px;">Erreur !</strong>
+            <span th:text="${error}" style="font-size: 14px;">Message</span>
+        </div>
+        <button onclick="this.parentElement.parentElement.remove()" style="margin-left: auto; background: none; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0;">×</button>
+    </div>
+</div>
 
 <!-- HEADER -->
 <div class="header">
@@ -723,6 +744,10 @@
     const statsStatut = /*[[${statsStatut}]]*/ {};
     const statsCategorie = /*[[${statsCategorie}]]*/ {};
     const statsQuartiers = /*[[${statsQuartiers}]]*/ {};
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('[style*="position: fixed"]');
+        alerts.forEach(alert => alert.remove());
+    }, 1000);
 
     const ctxStatut = document.getElementById('chartStatut').getContext('2d');
     new Chart(ctxStatut, {
