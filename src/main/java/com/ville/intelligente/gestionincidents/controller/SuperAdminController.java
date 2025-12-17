@@ -9,6 +9,7 @@ import com.ville.intelligente.gestionincidents.model.enums.Role;
 import com.ville.intelligente.gestionincidents.service.DepartementService;
 import com.ville.intelligente.gestionincidents.service.UtilisateurService;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,6 +23,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/super-admin")
+@PreAuthorize("hasRole('SUPER_ADMIN')")
 public class SuperAdminController {
 
     private final UtilisateurService utilisateurService;
@@ -55,9 +57,7 @@ public class SuperAdminController {
         return "dashboard";
     }
 
-    // =========================
-    // CREER UN UTILISATEUR
-    // =========================
+     
     @GetMapping("/create-user")
     public String showCreateUserForm(Model model) {
         model.addAttribute("createUserRequest", new CreateAdminAgentRequest());
@@ -90,12 +90,10 @@ public class SuperAdminController {
             return "super-admin/create-user";
         }
 
-        return "redirect:/super-admin/create-user"; // redirect vers le formulaire avec message flash
+        return "redirect:/super-admin/create-user";  
     }
 
-    // =========================
-    // CREER UN DEPARTEMENT
-    // =========================
+    
     @GetMapping("/create-departement")
     public String showCreateDepartementForm(Model model) {
         model.addAttribute("createDepartementRequest", new CreateDepartementRequest());
@@ -121,12 +119,10 @@ public class SuperAdminController {
             return "super-admin/create-departement";
         }
 
-        return "redirect:/super-admin/create-departement"; // redirect vers le formulaire avec message flash
+        return "redirect:/super-admin/create-departement";  
     }
 
-    // =========================
-    // LISTE UTILISATEURS
-    // =========================
+     
     @GetMapping("/utilisateurs")
     public String listeUtilisateurs(@RequestParam(required = false) String role, Model model) {
         List<Utilisateur> utilisateurs;
@@ -147,9 +143,7 @@ public class SuperAdminController {
         return "super-admin/utilisateurs";
     }
 
-    // =========================
-    // LISTE DEPARTEMENTS
-    // =========================
+    
     @GetMapping("/departements")
     public String listeDepartements(Model model) {
         List<CategorieIncident> departements = departementService.findAll();
@@ -174,9 +168,7 @@ public class SuperAdminController {
         return "super-admin/departements";
     }
 
-    // =========================
-    // SUPPRIMER UTILISATEUR
-    // =========================
+    
     @PostMapping("/utilisateurs/{id}/delete")
     public String supprimerUtilisateur(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         try {

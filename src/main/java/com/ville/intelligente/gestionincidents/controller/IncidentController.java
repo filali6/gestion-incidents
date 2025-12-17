@@ -56,8 +56,6 @@ public class IncidentController {
               incident.setPriorite(2);
 
 
-              
-               
               if (photoFile != null && !photoFile.isEmpty()) {
 
                   
