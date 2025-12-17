@@ -1,5 +1,8 @@
 package com.ville.intelligente.gestionincidents.metier;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -228,6 +231,19 @@ public class IncidentServiceImpl implements IncidentService {
     public List<Incident> getIncidentsByCitoyen(Utilisateur citoyen) {
         return incidentDao.findByCitoyen(citoyen);
     }
+    
+    @Override
+    public Page<Incident> findAllWithPagination(Pageable pageable) {
+        return incidentDao.findAll(pageable);
+    }
+    
+    @Override
+    public Page<Incident> findByFiltersWithPagination(StatutIncident statut, String categorie, String quartier,
+            Date dateDeclaration, Pageable pageable) {
+        return incidentDao.findByFiltersWithPageable(statut, categorie, quartier, dateDeclaration, pageable);
+    }
+
+
 
     
     
