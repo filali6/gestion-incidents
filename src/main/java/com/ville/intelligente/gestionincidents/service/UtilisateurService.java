@@ -89,11 +89,9 @@ public class UtilisateurService {
             throw new RuntimeException("Email déjà utilisé");
         }
 
-        // Récupération du département
         CategorieIncident departement = categorieIncidentDAO.findById(request.getDepartementId())
                 .orElseThrow(() -> new RuntimeException("Département introuvable"));
 
-        // CAS : CREATION ADMIN
         if (request.getRole() == Role.ROLE_ADMIN && departement.getAdmin() != null) {
             throw new RuntimeException("Ce département possède déjà un administrateur");
         }
@@ -114,7 +112,6 @@ public class UtilisateurService {
 
         utilisateurRepository.save(utilisateur);
 
-        // AFFECTATION ADMIN → DEPARTEMENT
         if (request.getRole() == Role.ROLE_ADMIN) {
             departement.setAdmin(utilisateur);
             categorieIncidentDAO.save(departement);
@@ -149,16 +146,15 @@ public class UtilisateurService {
     public List<Utilisateur> findAll() {
         return utilisateurRepository.findAll();
     }
-    
-    
+
     public void supprimerUtilisateur(Long id) {
         Utilisateur utilisateur = utilisateurRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
-        // Vérifier qu'on ne supprime pas un super admin
         if (utilisateur.getRole() == Role.ROLE_SUPER_ADMIN) {
             throw new RuntimeException("Impossible de supprimer un super administrateur");
         }
+
         if (utilisateur.getDepartement() != null) {
             CategorieIncident dept = utilisateur.getDepartement();
             if (dept.getAdmin() != null && dept.getAdmin().getId().equals(id)) {
@@ -166,13 +162,63 @@ public class UtilisateurService {
             }
         }
 
-        // Suppression directe
         utilisateurRepository.deleteById(id);
     }
-    
+
     public List<Utilisateur> getAgentsParDepartement(Long departementId) {
         return utilisateurRepository.findByDepartementIdAndRole(departementId, Role.ROLE_AGENT);
     }
-    
-      
+
+    // =====================================================
+    // ===================== PROFIL ========================
+    // =====================================================
+
+    /**
+     * Récupérer le profil de l'utilisateur connecté
+     */
+    public Utilisateur getProfilUtilisateur(String emailConnecte) {
+        return utilisateurRepository.findByEmail(emailConnecte)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+    }
+
+    /**
+     * Mise à jour du profil (infos personnelles)
+     */
+    public Utilisateur mettreAJourProfil(
+            String emailConnecte,
+            String nom,
+            String prenom,
+            String telephone) {
+
+        Utilisateur utilisateur = getProfilUtilisateur(emailConnecte);
+
+        utilisateur.setNom(nom);
+        utilisateur.setPrenom(prenom);
+        utilisateur.setTelephone(telephone);
+
+        return utilisateurRepository.save(utilisateur);
+    }
+
+    /**
+     * Changement du mot de passe
+     */
+    public void changerMotDePasse(
+            String emailConnecte,
+            String ancienMotDePasse,
+            String nouveauMotDePasse,
+            String confirmationMotDePasse) {
+
+        Utilisateur utilisateur = getProfilUtilisateur(emailConnecte);
+
+        if (!passwordEncoder.matches(ancienMotDePasse, utilisateur.getMotDePasse())) {
+            throw new RuntimeException("Ancien mot de passe incorrect");
+        }
+
+        if (!nouveauMotDePasse.equals(confirmationMotDePasse)) {
+            throw new RuntimeException("Les nouveaux mots de passe ne correspondent pas");
+        }
+
+        utilisateur.setMotDePasse(passwordEncoder.encode(nouveauMotDePasse));
+        utilisateurRepository.save(utilisateur);
+    }
 }
