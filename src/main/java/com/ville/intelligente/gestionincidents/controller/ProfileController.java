@@ -19,9 +19,7 @@ public class ProfileController {
         this.utilisateurService = utilisateurService;
     }
 
-    /**
-     * Affichage du profil utilisateur connecté
-     */
+     
     @GetMapping
     public String afficherProfil(Authentication authentication, Model model) {
 
@@ -33,9 +31,7 @@ public class ProfileController {
         return "profile";
     }
 
-    /**
-     * Mise à jour des informations personnelles
-     */
+    
     @PostMapping("/update")
     public String mettreAJourProfil(
             Authentication authentication,
@@ -66,9 +62,7 @@ public class ProfileController {
         return "redirect:/profile";
     }
 
-    /**
-     * Changement du mot de passe
-     */
+    
     @PostMapping("/change-password")
     public String changerMotDePasse(
             Authentication authentication,

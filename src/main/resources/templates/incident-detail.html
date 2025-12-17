@@ -534,7 +534,7 @@
                 <!-- Message si résolu -->
                 <div th:if="${incident.statut.name() == 'RESOLU'}" 
                      style="background: #d4edda; padding: 15px; border-radius: 8px; text-align: center; color: #155724;">
-                    ✅ Incident résolu ! En attente du feedback du citoyen pour clôture.
+                     Incident résolu ! En attente du feedback du citoyen pour clôture.
                 </div>
             </div>
 
@@ -619,7 +619,7 @@
                  th:classappend="${incident.statut.name() != 'RESOLU' ? 'disabled' : ''}"
                  class="feedback-section">
                 
-                <h3>✅ Donner votre feedback</h3>
+                <h3> Donner votre feedback</h3>
                 
                 <!-- Message si incident pas encore résolu -->
                 <div th:if="${incident.statut.name() != 'RESOLU' && incident.statut.name() != 'CLOTURE'}" class="feedback-info">
@@ -628,7 +628,7 @@
                 
                 <!-- Message si déjà clôturé -->
                 <div th:if="${incident.statut.name() == 'CLOTURE'}" class="feedback-display">
-                    <strong>✅ Incident clôturé</strong>
+                    <strong> Incident clôturé</strong>
                     <p style="margin-top: 10px;">Votre feedback :</p>
                     <p th:text="${incident.feedbackCitoyen}" style="font-style: italic; margin-top: 5px;"></p>
                 </div>
@@ -647,7 +647,7 @@
                     <button type="submit" 
                             class="btn-submit-feedback"
                             th:disabled="${incident.statut.name() != 'RESOLU'}">
-                        ✅ Soumettre le feedback et clôturer l'incident
+                          Soumettre le feedback et clôturer l'incident
                     </button>
                 </form>
             </div>

@@ -36,14 +36,14 @@ public class IncidentController {
         
     }
 
-    //  afficher le formulaire
+     
     @GetMapping("/declarer")
     public String showForm(Model model) {
         model.addAttribute("incident", new Incident());
         return "incident-form";
     }
 
-    //   traiter la soumission du formulaire
+     
     @PostMapping("/save")
     public String saveIncident(
         Incident incident,
@@ -67,7 +67,7 @@ public class IncidentController {
                       return "incident-form";
                   }
 
-                  // Vérifier le type de fichier
+                  
                   String contentType = photoFile.getContentType();
                   if (contentType == null ||
                           (!contentType.equals("image/jpeg") &&
@@ -82,7 +82,7 @@ public class IncidentController {
     Incident savedIncident =
             incidentService.saveIncidentWithPhoto(incident, photoFile, categorieNom, quartierNom, quartierVille,
                     quartierCodePostal);
-    redirectAttributes.addFlashAttribute("success", "✅ Incident déclaré avec succès !");
+    redirectAttributes.addFlashAttribute("success", " Incident déclaré avec succès !");
 
     return "redirect:/citoyen/dashboard"  ;
 }
@@ -102,22 +102,22 @@ public String soumettFeedback(
         @AuthenticationPrincipal UserDetails userDetails,
         RedirectAttributes redirectAttributes) {
     
-    // Récupérer l'incident
+     
     Incident incident = incidentDAO.findById(id)
             .orElseThrow(() -> new RuntimeException("Incident non trouvé"));
     
-    // Vérifier que c'est bien le citoyen propriétaire
+     
     Utilisateur citoyen = utilisateurService.findByEmail(userDetails.getUsername());
     if (!incident.getCitoyen().getId().equals(citoyen.getId())) {
         throw new RuntimeException("Vous n'êtes pas autorisé à donner un feedback sur cet incident");
     }
     
-    // Vérifier que l'incident est bien RESOLU
+ 
     if (incident.getStatut() != StatutIncident.RESOLU) {
         throw new RuntimeException("Le feedback n'est possible que pour les incidents résolus");
     }
     
-    // Enregistrer le feedback et clôturer
+    
     incident.setFeedbackCitoyen(feedbackCitoyen);
     incident.setStatut(StatutIncident.CLOTURE);
     incidentDAO.save(incident);

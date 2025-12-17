@@ -28,12 +28,12 @@ public class Notification {
     @Column(nullable = false)
     private NotificationType type;
 
-    // Destinataire de la notification
+     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "utilisateur_id", nullable = false)
     private Utilisateur utilisateur;
 
-    // Incident concerné (optionnel)
+     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "incident_id")
     private Incident incident;

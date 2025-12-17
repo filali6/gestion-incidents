@@ -31,15 +31,15 @@ public interface IncidentDAO extends JpaRepository<Incident, Long> {
     
      
 
-    // Compter par catégorie
+    // Count par catégorie
     @Query("SELECT COUNT(i) FROM Incident i WHERE i.categorie.nom = ?1")
     long countByCategorie(String categorieNom);
 
-    // Compter par quartier
+    // Count par quartier
     @Query("SELECT COUNT(i) FROM Incident i WHERE i.quartier.nom = ?1")
     long countByQuartier(String quartierNom);
 
-    // Récupérer tous par statut
+    // find par statut
     List<Incident> findByStatut(StatutIncident statut);
 
     // Récupérer par catégorie
@@ -53,11 +53,9 @@ public interface IncidentDAO extends JpaRepository<Incident, Long> {
     @Query("SELECT i.quartier.nom, COUNT(i) FROM Incident i GROUP BY i.quartier.nom ORDER BY COUNT(i) DESC")
     List<Object[]> countByQuartier();
 
-    // Pour le graphique temporel
-    @Query("SELECT FUNCTION('DATE', i.dateDeclaration), COUNT(i) FROM Incident i GROUP BY FUNCTION('DATE', i.dateDeclaration) ORDER BY FUNCTION('DATE', i.dateDeclaration)")
-    List<Object[]> countByDate();
+     
 
-    // Recherche avec filtres - Compare seulement la DATE (pas l'heure)
+    //  filtres - Compare seulement la DATE  
     @Query("SELECT i FROM Incident i WHERE " +
             "(:statut IS NULL OR i.statut = :statut) AND " +
             "(:categorie IS NULL OR :categorie = '' OR i.categorie.nom = :categorie) AND " +

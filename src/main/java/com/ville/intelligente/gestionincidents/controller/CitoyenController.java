@@ -41,19 +41,7 @@ public class CitoyenController {
        
         List<Incident> mesIncidents = incidentDAO.findByCitoyen(citoyen);
 
-        // ✅ LOGS DE DEBUG
-        System.out.println("========================================");
-        System.out.println("Nombre d'incidents trouvés : " + mesIncidents.size());
-
-        for (Incident incident : mesIncidents) {
-            System.out.println("Incident ID: " + incident.getId());
-            System.out.println("Titre: " + incident.getTitre());
-            System.out.println("Statut: " + incident.getStatut());
-            System.out.println(
-                    "Catégorie: " + (incident.getCategorie() != null ? incident.getCategorie().getNom() : "NULL"));
-            System.out.println("---");
-        }
-        System.out.println("========================================");
+       
         long totalMesIncidents = mesIncidents.size();
          
         model.addAttribute("totalIncidents", totalMesIncidents);

@@ -19,16 +19,16 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
     Optional<Utilisateur> findByTokenVerificationEmail(String token);
 
     boolean existsByEmail(String email);
-    // Trouver les utilisateurs par département et rôle
+     
     List<Utilisateur> findByDepartementIdAndRole(Long departementId, Role role);
     
-    // Trouver tous les utilisateurs d'un département
+    
     List<Utilisateur> findByDepartementId(Long departementId);
     
-    // Trouver les utilisateurs par rôle
+    
     List<Utilisateur> findByRole(Role role);
     
-    // Alternative avec Query si la méthode automatique ne fonctionne pas
+     
     @Query("SELECT u FROM Utilisateur u WHERE u.departement.id = :departementId AND u.role = :role")
     List<Utilisateur> findAgentsByDepartement(@Param("departementId") Long departementId, @Param("role") Role role);
 }

@@ -56,11 +56,11 @@ public class AdminController {
 
         Long deptId = admin.getDepartement().getId();
 
-        // Incidents du département
+         
         List<Incident> incidentsDept = incidentDAO.findByCategorie_Id(deptId);
         
 
-        // Agents du département
+        
         List<Utilisateur> agentsDept = utilisateurService.findAll().stream()
                 .filter(u -> u.getDepartement() != null &&
                         u.getDepartement().getId().equals(deptId) &&
@@ -86,15 +86,13 @@ public class AdminController {
         Incident incident = incidentDAO.findById(id)
                 .orElseThrow(() -> new RuntimeException("Incident non trouvé"));
 
-        // Vérifier que l'incident est bien dans le département de l'admin
-        if (admin.getDepartement() == null ||
+         if (admin.getDepartement() == null ||
                 incident.getCategorie() == null ||
                 !incident.getCategorie().getId().equals(admin.getDepartement().getId())) {
             throw new RuntimeException("Vous n'êtes pas autorisé à gérer cet incident");
         }
 
-        // Récupérer les agents de son département
-        List<Utilisateur> agentsDepartement = utilisateurService.findAll().stream()
+         List<Utilisateur> agentsDepartement = utilisateurService.findAll().stream()
                 .filter(u -> u.getDepartement() != null &&
                         u.getDepartement().getId().equals(admin.getDepartement().getId()) &&
                         u.getRole() == Role.ROLE_AGENT)
@@ -105,7 +103,6 @@ public class AdminController {
 
         return "admin/assigner-incident";
     }
-    // ✅ NOUVELLE MÉTHODE : Traiter l'assignation
     @PostMapping("/assigner-incident/{id}")
     public String assignerIncident(
             @PathVariable Long id,
@@ -122,21 +119,18 @@ public class AdminController {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Agent non trouvé"));
         
-        // Vérifier que l'incident est bien dans le département de l'admin
-        if (admin.getDepartement() == null || 
+         if (admin.getDepartement() == null || 
             incident.getCategorie() == null ||
             !incident.getCategorie().getId().equals(admin.getDepartement().getId())) {
             throw new RuntimeException("Vous n'êtes pas autorisé à gérer cet incident");
         }
         
-        // Assigner l'incident
-        incident.setAgentAssigne(agent);
+         incident.setAgentAssigne(agent);
         incident.setPriorite(priorite);
         incident.setStatut(StatutIncident.PRIS_EN_CHARGE);
         incidentDAO.save(incident);
         
-        // ✅ ENVOI DES EMAILS
-        // Email à l'agent
+         //email
         String sujetAgent = "Nouvel incident assigné";
         String contenuAgent = "<h2>Bonjour " + agent.getPrenom() + ",</h2>" +
                 "<p>Un nouvel incident vous a été assigné :</p>" +

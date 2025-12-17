@@ -35,10 +35,10 @@ public class IncidentListController {
         @RequestParam(required = false) String categorie,
         @RequestParam(required = false) String quartier,
         @RequestParam(required = false) String dateDeclaration ,
-        @RequestParam(defaultValue = "0") int page, // ✅ NOUVEAU : Numéro de page
-        @RequestParam(defaultValue = "10") int size, // ✅ NOUVEAU : Taille de page
-        @RequestParam(defaultValue = "dateDeclaration") String sortBy, // ✅ NOUVEAU : Colonne de tri
-        @RequestParam(defaultValue = "desc") String sortDir, // ✅ NOUVEAU : Direction du tri
+        @RequestParam(defaultValue = "0") int page,  
+        @RequestParam(defaultValue = "10") int size,  
+        @RequestParam(defaultValue = "dateDeclaration") String sortBy,  
+        @RequestParam(defaultValue = "desc") String sortDir,  
     
     
         Model model) {
@@ -50,15 +50,15 @@ public class IncidentListController {
             if (dateDeclaration != null && !dateDeclaration.isEmpty()) {
                 sqlDate = Date.valueOf(dateDeclaration); // conversion String -> java.sql.Date
             }
-        // ✅ Créer le tri
+        //tri
         Sort sort = sortDir.equalsIgnoreCase("asc") 
                 ? Sort.by(sortBy).ascending() 
                 : Sort.by(sortBy).descending();
 
-        // ✅ Créer la pagination
+        //pagination
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        // ✅ Récupérer les incidents avec pagination
+        // incidents avec pagination
         Page<Incident> incidentsPage;
 
         if (statutEnum != null || (categorie != null && !categorie.isEmpty()) ||
