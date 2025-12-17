@@ -17,18 +17,15 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
-        private final RoleBasedAuthenticationSuccessHandler successHandler;
+    private final RoleBasedAuthenticationSuccessHandler successHandler;
 
     public SecurityConfig(CustomUserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder, RoleBasedAuthenticationSuccessHandler successHandler) {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
-        this.successHandler=successHandler;
+        this.successHandler = successHandler;
     }
 
-    // =========================
-    // Authentication Provider
-    // =========================
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -37,43 +34,40 @@ public class SecurityConfig {
         return authProvider;
     }
 
-    // =========================
-    // Security Filter Chain
-    // =========================
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
 
-                // Configuration des rôles et accès
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/register", "/verify", "/css/**", "/js/**", "/static/**",
-                                                                                                               
-                                "/resources/**", 
-                                "/public/**").permitAll()
+
+                                "/resources/**",
+                                "/public/**")
+                        .permitAll()
                         .requestMatchers("/super-admin/**").hasRole("SUPER_ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/agent/**").hasRole("AGENT")
                         .requestMatchers("/citoyen/**").hasRole("CITIZEN")
+
                         .requestMatchers(
                                 "/dashboard",
                                 "/incident/**",
                                 "/incidents/**",
                                 "/export/**")
                         .authenticated()
+
                         .anyRequest().authenticated())
 
-                // Form login
                 .formLogin(form -> form
                         .loginPage("/login")
                         .failureUrl("/login?error")
                         .successHandler(successHandler)
                         .permitAll())
 
-                // Logout
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")
-                    .permitAll());
+                        .permitAll());
 
         return http.build();
     }
