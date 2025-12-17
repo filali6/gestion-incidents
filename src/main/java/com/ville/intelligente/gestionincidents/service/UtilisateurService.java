@@ -149,4 +149,30 @@ public class UtilisateurService {
     public List<Utilisateur> findAll() {
         return utilisateurRepository.findAll();
     }
+    
+    
+    public void supprimerUtilisateur(Long id) {
+        Utilisateur utilisateur = utilisateurRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        // Vérifier qu'on ne supprime pas un super admin
+        if (utilisateur.getRole() == Role.ROLE_SUPER_ADMIN) {
+            throw new RuntimeException("Impossible de supprimer un super administrateur");
+        }
+        if (utilisateur.getDepartement() != null) {
+            CategorieIncident dept = utilisateur.getDepartement();
+            if (dept.getAdmin() != null && dept.getAdmin().getId().equals(id)) {
+                dept.setAdmin(null);
+            }
+        }
+
+        // Suppression directe
+        utilisateurRepository.deleteById(id);
+    }
+    
+    public List<Utilisateur> getAgentsParDepartement(Long departementId) {
+        return utilisateurRepository.findByDepartementIdAndRole(departementId, Role.ROLE_AGENT);
+    }
+    
+      
 }

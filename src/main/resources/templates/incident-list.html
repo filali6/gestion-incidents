@@ -1,19 +1,27 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Liste des incidents</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des Incidents - Gestion des Incidents</title>
 
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f5f6fa;
-            margin: 0;
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
+            min-height: 100vh;
         }
 
+        /* HEADER */
         .header {
             background: #2c3e50;
             color: white;
@@ -21,170 +29,388 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .btn-logout {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* MAIN CONTAINER */
         .main-container {
             display: flex;
             flex: 1;
         }
 
+        /* SIDEBAR */
         .sidebar {
             width: 250px;
             background: white;
-            padding: 20px 0;
             box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            padding: 20px 0;
         }
 
         .sidebar-menu {
             list-style: none;
-            padding: 0;
         }
 
         .sidebar-menu a {
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 12px;
             padding: 15px 25px;
-            text-decoration: none;
             color: #2c3e50;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 15px;
         }
 
+        .sidebar-menu a:hover,
         .sidebar-menu a.active {
             background: #3498db;
             color: white;
+            border-left: 4px solid #2980b9;
         }
 
+        /* CONTENT */
         .content {
             flex: 1;
             padding: 30px;
+            overflow-y: auto;
         }
 
-        .incident-card {
+        .page-title {
+            font-size: 28px;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        /* FILTERS */
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .btn-filter {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-reset {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        /* TABLE */
+        .table-container {
             background: white;
             border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
+            padding: 25px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
         }
 
-        .incident-card:hover {
-            transform: translateY(-3px);
+        table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        .incident-title {
-            font-size: 18px;
+        thead tr {
+            background: #ecf0f1;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
             font-weight: 600;
             color: #2c3e50;
+            border-bottom: 2px solid #bdc3c7;
         }
 
-        .incident-meta {
-            margin-top: 8px;
-            font-size: 14px;
-            color: #7f8c8d;
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
         }
 
         .badge {
             padding: 5px 12px;
-            border-radius: 15px;
+            border-radius: 12px;
             font-size: 12px;
             font-weight: 600;
-            color: white;
             display: inline-block;
-            margin-top: 10px;
         }
 
-        .SIGNALE { background: #e74c3c; }
-        .PRIS_EN_CHARGE { background: #3498db; }
-        .EN_RESOLUTION { background: #f39c12; }
-        .RESOLU { background: #27ae60; }
-        .CLOTURE { background: #9b59b6; }
+        .badge-signale { background: #fee; color: #e74c3c; }
+        .badge-pris { background: #e3f2fd; color: #2196f3; }
+        .badge-resolution { background: #fef3cd; color: #f39c12; }
+        .badge-resolu { background: #d4edda; color: #28a745; }
+        .badge-cloture { background: #e8f5e9; color: #4caf50; }
 
+        .btn-action {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 13px;
+        }
+
+        /* FOOTER */
         .footer {
             background: white;
-            padding: 15px;
+            padding: 20px 30px;
             text-align: center;
-            font-size: 14px;
             color: #7f8c8d;
+            font-size: 14px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
 
+<!-- HEADER -->
 <div class="header">
-    <h2>📋 Liste des incidents</h2>
+    <h1>🏙️ Gestion des Incidents - Ville Intelligente</h1>
+    <div class="header-user">
+        <span sec:authentication="name">👤 Utilisateur</span>
+        <form th:action="@{/logout}" method="post" style="display: inline;">
+            <button type="submit" class="btn-logout">🚪 Déconnexion</button>
+        </form>
+    </div>
 </div>
 
+<!-- MAIN CONTAINER -->
 <div class="main-container">
-
+    
     <!-- SIDEBAR -->
     <aside class="sidebar">
         <ul class="sidebar-menu">
-            <li><a th:href="@{/dashboard}">📊 Tableau de bord</a></li>
-            <li><a th:href="@{/incident/declarer}">➕ Déclarer un incident</a></li>
-            <li><a th:href="@{/incidents/liste}" class="active">📋 Liste des incidents</a></li>
+            <!-- Dashboard selon le rôle -->
+            <li sec:authorize="hasRole('SUPER_ADMIN')">
+                <a th:href="@{/super-admin/dashboard}">
+                    <span class="icon">📊</span>
+                    <span>Tableau de bord</span>
+                </a>
+            </li>
+            <li sec:authorize="hasRole('ADMIN')">
+                <a th:href="@{/admin/dashboard}">
+                    <span class="icon">📊</span>
+                    <span>Tableau de bord</span>
+                </a>
+            </li>
+            <li sec:authorize="hasRole('AGENT')">
+                <a th:href="@{/agent/dashboard}">
+                    <span class="icon">📊</span>
+                    <span>Tableau de bord</span>
+                </a>
+            </li>
+            
+            <!-- SUPER_ADMIN : Gestion utilisateurs/départements -->
+            <li sec:authorize="hasRole('SUPER_ADMIN')">
+                <a th:href="@{/super-admin/utilisateurs}">
+                    <span class="icon">👥</span>
+                    <span>Utilisateurs</span>
+                </a>
+            </li>
+            <li sec:authorize="hasRole('SUPER_ADMIN')">
+                <a th:href="@{/super-admin/departements}">
+                    <span class="icon">🏢</span>
+                    <span>Départements</span>
+                </a>
+            </li>
+            <li sec:authorize="hasRole('SUPER_ADMIN')">
+                <a th:href="@{/super-admin/create-user}">
+                    <span class="icon">➕</span>
+                    <span>Créer utilisateur</span>
+                </a>
+            </li>
+            <li sec:authorize="hasRole('SUPER_ADMIN')">
+                <a th:href="@{/super-admin/create-departement}">
+                    <span class="icon">🏢</span>
+                    <span>Créer département</span>
+                </a>
+            </li>
+            
+            <!-- Liste incidents (SUPER_ADMIN, ADMIN, AGENT) -->
+            <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN', 'AGENT')">
+                <a th:href="@{/incidents/liste}" class="active">
+                    <span class="icon">📋</span>
+                    <span>Liste des incidents</span>
+                </a>
+            </li>
+            
+            <!-- EXPORTS (SUPER_ADMIN & ADMIN) -->
+            <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN')">
+                <a th:href="@{/export/csv}">
+                    <span class="icon">📥</span>
+                    <span>Export CSV</span>
+                </a>
+            </li>
+            <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN')">
+                <a th:href="@{/export/pdf}">
+                    <span class="icon">📄</span>
+                    <span>Export PDF</span>
+                </a>
+            </li>
         </ul>
     </aside>
 
     <!-- CONTENT -->
     <main class="content">
+        <h2 class="page-title">📋 Liste des Incidents</h2>
 
-        <div th:if="${#lists.isEmpty(incidents)}">
-            <p>Aucun incident déclaré pour le moment.</p>
-        </div>
-        <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-    <form method="get" style="display: flex; gap: 15px; align-items: center;">
-        <select name="statut" style="padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-            <option value="">Tous les statuts</option>
-            <option value="SIGNALE">Signalé</option>
-            <option value="PRIS_EN_CHARGE">Pris en charge</option>
-            <option value="EN_RESOLUTION">En résolution</option>
-            <option value="RESOLU">Résolu</option>
-            <option value="CLOTURE">Clôturé</option>
-        </select>
-        
-        <select name="categorie" style="padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-            <option value="">Toutes catégories</option>
-            <option value="Infrastructure">Infrastructure</option>
-            <option value="Propreté">Propreté</option>
-            <option value="Sécurité">Sécurité</option>
-            <option value="Éclairage">Éclairage</option>
-        </select>
-        <select name="quartier" style="padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-    <option value="">Tous les quartiers</option>
- <option th:each="q : ${quartiers}" th:value="${q.nom}" th:text="${q.nom}"></option></select>
-
-<input type="date" name="dateDeclaration" placeholder="Date de déclaration" 
-       style="padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-         
-        <button type="submit" style="padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            🔍 Filtrer
-        </button>
-        
-        <a href="/incidents/liste" style="padding: 10px 20px; background: #95a5a6; color: white; text-decoration: none; border-radius: 5px;">
-            ❌ Réinitialiser
-        </a>
-    </form>
-</div>
-
-        <div th:each="incident : ${incidents}">
-            <a th:href="@{/incident/{id}(id=${incident.id})}" style="text-decoration:none">
-                <div class="incident-card">
-                    <div class="incident-title" th:text="${incident.titre}"></div>
-
-                    <div class="incident-meta">
-📅 <span th:text="${#temporals.format(incident.dateDeclaration, 'dd/MM/yyyy HH:mm')}"></span><br>                        🗂️ 🗂️ <span th:text="${incident.categorie != null ? incident.categorie.nom : 'Non défini'}"></span><br><br>
-                        ⚠️ Priorité : <span th:text="${incident.priorite}"></span>
-                    </div>
-
-                    <span class="badge" th:text="${incident.statut}" th:classappend="${incident.statut}"></span>
+        <!-- FILTRES -->
+        <div class="filters">
+            <form method="get" th:action="@{/incidents/liste}">
+                <div class="filter-group">
+                    <select name="statut">
+                        <option value="">Tous les statuts</option>
+                        <option value="SIGNALE" th:selected="${param.statut != null && param.statut[0] == 'SIGNALE'}">🔴 Signalé</option>
+                        <option value="PRIS_EN_CHARGE" th:selected="${param.statut != null && param.statut[0] == 'PRIS_EN_CHARGE'}">🔵 Pris en charge</option>
+                        <option value="EN_RESOLUTION" th:selected="${param.statut != null && param.statut[0] == 'EN_RESOLUTION'}">🟡 En résolution</option>
+                        <option value="RESOLU" th:selected="${param.statut != null && param.statut[0] == 'RESOLU'}">🟢 Résolu</option>
+                        <option value="CLOTURE" th:selected="${param.statut != null && param.statut[0] == 'CLOTURE'}">✅ Clôturé</option>
+                    </select>
+                    
+                    <select name="categorie">
+                        <option value="">Toutes catégories</option>
+                        <option value="Infrastructure" th:selected="${param.categorie != null && param.categorie[0] == 'Infrastructure'}">🏗️ Infrastructure</option>
+                        <option value="Propreté" th:selected="${param.categorie != null && param.categorie[0] == 'Propreté'}">🧹 Propreté</option>
+                        <option value="Sécurité" th:selected="${param.categorie != null && param.categorie[0] == 'Sécurité'}">🚨 Sécurité</option>
+                        <option value="Éclairage" th:selected="${param.categorie != null && param.categorie[0] == 'Éclairage'}">💡 Éclairage</option>
+                        <option value="Transport" th:selected="${param.categorie != null && param.categorie[0] == 'Transport'}">🚌 Transport</option>
+                        <option value="Environnement" th:selected="${param.categorie != null && param.categorie[0] == 'Environnement'}">🌳 Environnement</option>
+                    </select>
+                    
+                    <select name="quartier">
+                        <option value="">Tous les quartiers</option>
+                        <option th:each="q : ${quartiers}" 
+                                th:value="${q.nom}" 
+                                th:text="${q.nom}"
+                                th:selected="${param.quartier != null && param.quartier[0] == q.nom}"></option>
+                    </select>
+                    
+                    <input type="date" name="dateDeclaration" 
+                           th:value="${param.dateDeclaration != null ? param.dateDeclaration[0] : ''}"
+                           placeholder="Date de déclaration">
+                    
+                    <button type="submit" class="btn-filter">🔍 Filtrer</button>
+                    <a th:href="@{/incidents/liste}" class="btn-reset">🔄 Réinitialiser</a>
                 </div>
-            </a>
+            </form>
         </div>
 
+        <!-- TABLEAU -->
+        <div class="table-container">
+            <p style="margin-bottom: 15px; color: #7f8c8d;">
+                <strong th:text="${incidents.size()}">0</strong> incident(s) trouvé(s)
+            </p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Titre</th>
+                        <th>Catégorie</th>
+                        <th>Quartier</th>
+                        <th>Date</th>
+                        <th>Priorité</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="incident : ${incidents}">
+                        <td th:text="${incident.id}">1</td>
+                        <td th:text="${incident.titre}">Titre</td>
+                        <td th:text="${incident.categorie?.nom ?: 'Non défini'}">Catégorie</td>
+                        <td th:text="${incident.quartier?.nom ?: 'Non défini'}">Quartier</td>
+                        <td th:text="${#temporals.format(incident.dateDeclaration, 'dd/MM/yyyy HH:mm')}">Date</td>
+                        <td>
+                            <span th:text="${incident.priorite == 1 ? '🟢 Faible' : 
+                                            incident.priorite == 2 ? '🟡 Moyenne' : 
+                                            incident.priorite == 3 ? '🟠 Haute' : 
+                                            '🔴 Critique'}">Priorité</span>
+                        </td>
+                        <td>
+                            <span th:if="${incident.statut != null && incident.statut.name() == 'SIGNALE'}" class="badge badge-signale">🔴 Signalé</span>
+                            <span th:if="${incident.statut != null && incident.statut.name() == 'PRIS_EN_CHARGE'}" class="badge badge-pris">🔵 Pris en charge</span>
+                            <span th:if="${incident.statut != null && incident.statut.name() == 'EN_RESOLUTION'}" class="badge badge-resolution">🟡 En résolution</span>
+                            <span th:if="${incident.statut != null && incident.statut.name() == 'RESOLU'}" class="badge badge-resolu">🟢 Résolu</span>
+                            <span th:if="${incident.statut != null && incident.statut.name() == 'CLOTURE'}" class="badge badge-cloture">✅ Clôturé</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/incident/{id}(id=${incident.id})}" class="btn-action">
+                                👁️ Voir
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div th:if="${incidents.isEmpty()}" style="text-align: center; padding: 40px; color: #95a5a6;">
+                <p style="font-size: 18px;">Aucun incident trouvé avec ces filtres.</p>
+            </div>
+        </div>
     </main>
 </div>
 
+<!-- FOOTER -->
 <footer class="footer">
-    © 2025 Ville Intelligente – Gestion des incidents
+    <p>&copy; 2025 Ville Intelligente - Plateforme de Gestion des Incidents | Tous droits réservés</p>
 </footer>
 
 </body>

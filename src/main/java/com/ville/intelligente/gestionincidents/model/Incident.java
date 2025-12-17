@@ -30,6 +30,9 @@ public class Incident {
     private String titre;
     private String description;
     private LocalDateTime dateDeclaration;
+
+    private LocalDateTime dateResolution;
+
     private String adresse;
     private String feedbackCitoyen;
     private int priorite;
@@ -64,11 +67,12 @@ public class Incident {
     @OneToMany(mappedBy = "incident", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Notification> notifications = new HashSet<>();
 
-    public Incident(String titre, String description, LocalDateTime dateDeclaration, String adresse,
+    public Incident(String titre, String description, LocalDateTime dateDeclaration,  String adresse,
             StatutIncident statut, CategorieIncident categorie, Quartier quartier) {
         this.titre = titre;
         this.description = description;
         this.dateDeclaration = dateDeclaration;
+         
         this.adresse = adresse;
         this.statut = statut;
         this.categorie = categorie;

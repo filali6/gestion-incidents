@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.ville.intelligente.gestionincidents.model.Incident;
+import com.ville.intelligente.gestionincidents.model.Utilisateur;
 import com.ville.intelligente.gestionincidents.model.enums.StatutIncident;
 
 import java.sql.Date;
@@ -12,8 +13,21 @@ import java.util.List;
 
 public interface IncidentDAO extends JpaRepository<Incident, Long> {
 
+
+
     // Compter par statut
     long countByStatut(StatutIncident statut);
+    
+    List<Incident> findByCategorie_Id(Long departementId);
+
+    List<Incident> findByCitoyen(Utilisateur citoyen);
+    
+    List<Incident> findByAgentAssigne(Utilisateur agent);
+
+    @Query(value = "SELECT AVG(DATEDIFF(date_resolution, date_declaration)) FROM incidents WHERE date_resolution IS NOT NULL", nativeQuery = true)
+    Double getDelaiMoyenResolution();
+    
+     
 
     // Compter par catégorie
     @Query("SELECT COUNT(i) FROM Incident i WHERE i.categorie.nom = ?1")
@@ -52,4 +66,5 @@ public interface IncidentDAO extends JpaRepository<Incident, Long> {
             @Param("categorie") String categorie,
             @Param("quartier") String quartier,
             @Param("dateDeclaration")  Date dateDeclaration);
+
     }
