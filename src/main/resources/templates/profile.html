@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Mon profil - Gestion des Incidents</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-logout {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            padding: 20px 0;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            gap: 12px;
+            padding: 15px 25px;
+            color: #2c3e50;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: #3498db;
+            color: white;
+            border-left: 4px solid #2980b9;
+        }
+
+        .content {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .page-subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 40px 12px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        input[readonly] {
+            background: #f4f6f8;
+            cursor: not-allowed;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 18px;
+            color: #7f8c8d;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .footer {
+            background: white;
+            padding: 15px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <h1>🏙️ Gestion des Incidents - Ville Intelligente</h1>
+        <div class="header-user">
+            <span sec:authentication="name">Utilisateur</span>
+            <form th:action="@{/logout}" method="post">
+                <button class="btn-logout">🚪 Déconnexion</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-container">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a th:href="@{/dashboard}">📊 Tableau de bord</a></li>
+                <li><a th:href="@{/profile}" class="active">👤 Mon profil</a></li>
+            </ul>
+        </aside>
+
+        <!-- CONTENT -->
+        <main class="content">
+
+            <h2 class="page-title">👤 Mon profil</h2>
+            <p class="page-subtitle">Consultez et mettez à jour vos informations personnelles</p>
+
+            <div th:if="${successMessage}" class="alert-success" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert-error" th:text="${errorMessage}"></div>
+
+            <!-- INFOS PERSONNELLES -->
+            <div class="card">
+                <h3 class="card-title">📄 Informations personnelles</h3>
+
+                <form th:action="@{/profile/update}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" th:value="${utilisateur.email}" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nom</label>
+                        <input type="text" name="nom" th:value="${utilisateur.nom}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prénom</label>
+                        <input type="text" name="prenom" th:value="${utilisateur.prenom}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Téléphone</label>
+                        <input type="text" name="telephone" th:value="${utilisateur.telephone}" required>
+                    </div>
+
+                    <button class="btn-primary">💾 Mettre à jour</button>
+                </form>
+            </div>
+
+            <!-- MOT DE PASSE -->
+            <div class="card">
+                <h3 class="card-title">🔒 Changer le mot de passe</h3>
+
+                <form th:action="@{/profile/change-password}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                    <div class="form-group">
+                        <label>Ancien mot de passe</label>
+                        <input type="password" name="ancienMotDePasse" id="ancienMotDePasse" required>
+                        <span class="toggle-password" onclick="togglePassword('ancienMotDePasse')">👁️</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nouveau mot de passe</label>
+                        <input type="password" name="nouveauMotDePasse" id="nouveauMotDePasse" required>
+                        <span class="toggle-password" onclick="togglePassword('nouveauMotDePasse')">👁️</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Confirmation du mot de passe</label>
+                        <input type="password" name="confirmationMotDePasse" id="confirmationMotDePasse" required>
+                        <span class="toggle-password" onclick="togglePassword('confirmationMotDePasse')">👁️</span>
+                    </div>
+
+                    <button class="btn-warning">🔄 Modifier le mot de passe</button>
+                </form>
+            </div>
+
+        </main>
+    </div>
+
+    <footer class="footer">
+        &copy; 2025 Ville Intelligente - Gestion des Incidents
+    </footer>
+
+    <script>
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            if (input.type === "password") {
+                input.type = "text";
+            } else {
+                input.type = "password";
+            }
+        }
+    </script>
+
+</body>
+
+</html>
