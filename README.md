@@ -102,6 +102,8 @@ SIGNALE → PRIS_EN_CHARGE → EN_RESOLUTION → RESOLU → CLOTURE
 - Citoyen valide → CLOTURE (avec feedback)
 
 ### 📧 Notifications automatiques par email
+- Email au citoyen aprés création du compte
+- Email contenant les crendentials à l'agent et à l'admin aprés création de leurs comptes par le super-admin
 - Email à l'agent lors de l'assignation d'un incident
 - Email au citoyen lors de la prise en charge
 - Email au citoyen lors de la résolution (avec demande de feedback)
