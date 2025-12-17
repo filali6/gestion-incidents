@@ -191,7 +191,6 @@ User=citoyen@mail.com, Method=afficherDashboard
 ### 6. **Authentification **
 - Mots de passe hachés avec **BCrypt**  
 - Vérification d'email obligatoire
-- Session sécurisée avec cookie HttpOnly
  
 ---
 
