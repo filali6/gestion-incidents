@@ -48,6 +48,7 @@ public class SuperAdminController {
         model.addAttribute("statsStatut", statistiqueService.getStatistiquesParStatut());
         model.addAttribute("statsCategorie", statistiqueService.getStatistiquesParCategorie());
         model.addAttribute("statsQuartiers", statistiqueService.getTop5Quartiers());
+        model.addAttribute("delaiMoyen", statistiqueService.getDelaiMoyenResolution());  
 
         model.addAttribute("totalUtilisateurs", utilisateurs.size());
         model.addAttribute("totalDepartements", departements.size());
@@ -89,7 +90,7 @@ public class SuperAdminController {
             return "super-admin/create-user";
         }
 
-        return "dashboard";
+        return "redirect:/super-admin/dashboard";
     }
 
     
@@ -117,13 +118,12 @@ public class SuperAdminController {
             return "super-admin/create-departement";
         }
 
-        return "dashboard";
+        return "redirect:/super-admin/dashboard";
     }
     @GetMapping("/utilisateurs")
     public String listeUtilisateurs(@RequestParam(required = false) String role, Model model) {
         List<Utilisateur> utilisateurs;
-        
-        // Filtrage par rôle si spécifié
+         
         if (role != null && !role.isEmpty()) {
             Role roleEnum = Role.valueOf(role);
             utilisateurs = utilisateurService.findAll().stream()
@@ -143,7 +143,7 @@ public class SuperAdminController {
 public String listeDepartements(Model model) {
     List<CategorieIncident> departements = departementService.findAll();
     
-    // Compter le nombre d'agents par département
+     
     Map<Long, Long> nbAgentsParDept = new HashMap<>();
     for (CategorieIncident dept : departements) {
         long nbAgents = utilisateurService.findAll().stream()
@@ -162,5 +162,16 @@ public String listeDepartements(Model model) {
     model.addAttribute("nbSansAdmin", nbSansAdmin);
     
     return "super-admin/departements";
+}
+
+@PostMapping("/utilisateurs/{id}/delete")
+public String supprimerUtilisateur(@PathVariable Long id, Model model) {
+    try {
+        utilisateurService.supprimerUtilisateur(id);
+        
+        return "redirect:/super-admin/utilisateurs?success=deleted";
+    } catch (RuntimeException e) {
+        return "redirect:/super-admin/utilisateurs?error=" + e.getMessage();
+    }
 }
 }

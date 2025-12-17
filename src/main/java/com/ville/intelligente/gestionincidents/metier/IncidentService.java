@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ville.intelligente.gestionincidents.model.Incident;
+import com.ville.intelligente.gestionincidents.model.Utilisateur;
 import com.ville.intelligente.gestionincidents.model.enums.StatutIncident;
 
 public interface IncidentService {
@@ -17,5 +18,12 @@ public interface IncidentService {
     
     List<Incident> findAll();
     List<Incident> findByFilters(StatutIncident statut, String categorie,String quartier, Date dateDeclaration);
+    Incident changerStatut(Long incidentId, StatutIncident nouveauStatut, Utilisateur agent);
+    
+    List<Incident> getIncidentsParDepartement(Long departementId);
+
+    List<Incident> getIncidentsByAgent(Utilisateur agent);
+
+    List<Incident> getIncidentsByCitoyen(Utilisateur citoyen);
     
 }

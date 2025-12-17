@@ -152,6 +152,15 @@
             transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
+         .btn-logout {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
 
         .required {
             color: #e74c3c;
@@ -214,7 +223,10 @@
 <div class="header">
     <h1>🏙️ Gestion des Incidents - Ville Intelligente</h1>
     <div class="header-user">
-        <span>👤 Utilisateur</span>
+        <span sec:authentication="name">👤 Utilisateur</span>
+        <form th:action="@{/logout}" method="post" style="display: inline;">
+            <button type="submit" class="btn-logout">🚪 Déconnexion</button>
+        </form>
     </div>
 </div>
 
@@ -224,36 +236,17 @@
     <!-- SIDEBAR -->
     <aside class="sidebar">
         <ul class="sidebar-menu">
-            <li>
-                <a th:href="@{/dashboard}">
-                    <span class="icon">📊</span>
-                    <span>Tableau de bord</span>
-                </a>
+            
+            <li sec:authorize="hasRole('CITIZEN')">
+                <a th:href="@{/citoyen/dashboard}" class="active"><span>📊</span> <span>Tableau de bord</span></a>
             </li>
-            <li>
-                <a th:href="@{/incident/declarer}" class="active">
-                    <span class="icon">➕</span>
-                    <span>Déclarer un incident</span>
-                </a>
+            
+
+            <li sec:authorize="hasRole('CITIZEN')">
+                <a th:href="@{/incident/declarer}"><span>➕</span> <span>Déclarer un incident</span></a>
             </li>
-            <li>
-                <a th:href="@{/incidents/liste}">
-                    <span class="icon">📋</span>
-                    <span>Liste des incidents</span>
-                </a>
-            </li>
-            <li>
-                <a href="#">
-                    <span class="icon">📈</span>
-                    <span>Statistiques</span>
-                </a>
-            </li>
-            <li>
-                <a th:href="@{/export/csv}">
-                    <span class="icon">📥</span>
-                    <span>Export CSV</span>
-                </a>
-            </li>
+            
+            
         </ul>
     </aside>
 

@@ -9,6 +9,8 @@ public interface StatistiqueService {
     // Compter le total d'incidents
     long compterTotalIncidents();
 
+    Double getDelaiMoyenResolution();
+
     // Statistiques par statut
     Map<String, Long> getStatistiquesParStatut();
 
@@ -18,14 +20,14 @@ public interface StatistiqueService {
     // Statistiques par quartier (top 5)
     Map<String, Long> getTop5Quartiers();
     long compterIncidentsParCitoyen(Utilisateur citoyen);
-    Map<StatutIncident, Long> getStatistiquesParStatutPourCitoyen(Utilisateur citoyen);
+    Map<String, Long> getStatistiquesParStatutPourCitoyen(Utilisateur citoyen);
 
     long compterIncidentsParAgent(Utilisateur agent);
 
-    Map<StatutIncident, Long> getStatistiquesParStatutPourAgent(Utilisateur agent);
+    Map<String, Long> getStatistiquesParStatutPourAgent(Utilisateur agent);
 
     long compterIncidentsParDepartement(Long departementId);
 
-    Map<StatutIncident, Long> getStatistiquesParStatutPourDepartement(Long departementId);
+    Map<String, Long> getStatistiquesParStatutPourDepartement(Long departementId);
     
 }

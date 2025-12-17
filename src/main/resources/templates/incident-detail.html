@@ -92,8 +92,28 @@
             overflow-y: auto;
         }
 
+        /* ALERT MESSAGES */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
         .detail-container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
@@ -124,6 +144,67 @@
         .statut-resolution { background: #fff3cd; color: #f39c12; }
         .statut-resolu { background: #d4edda; color: #28a745; }
         .statut-cloture { background: #e8f5e9; color: #4caf50; }
+
+        /* AGENT ACTION SECTION */
+        .agent-actions {
+            background: #f8f9fa;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .agent-actions h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .action-info {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #1976d2;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .btn-action:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-action:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-prendre-charge {
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+            color: white;
+        }
+
+        .btn-resolution {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+
+        .btn-resolu {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
 
         .info-row {
             margin-bottom: 20px;
@@ -290,83 +371,92 @@
 <div class="main-container">
     
     <!-- SIDEBAR -->
-   <!-- SIDEBAR -->
-<aside class="sidebar">
-    <ul class="sidebar-menu">
-        <!-- Dashboard - Selon le rôle -->
-        <li sec:authorize="hasRole('SUPER_ADMIN')">
-            <a th:href="@{/super-admin/dashboard}">
-                <span class="icon">📊</span>
-                <span>Tableau de bord</span>
-            </a>
-        </li>
-        <li sec:authorize="hasRole('ADMIN')">
-            <a th:href="@{/admin/dashboard}">
-                <span class="icon">📊</span>
-                <span>Tableau de bord</span>
-            </a>
-        </li>
-        <li sec:authorize="hasRole('AGENT')">
-            <a th:href="@{/agent/dashboard}">
-                <span class="icon">📊</span>
-                <span>Tableau de bord</span>
-            </a>
-        </li>
-        <li sec:authorize="hasRole('CITIZEN')">
-            <a th:href="@{/citoyen/dashboard}">
-                <span class="icon">📊</span>
-                <span>Tableau de bord</span>
-            </a>
-        </li>
-        
-        <!-- MENU SUPER_ADMIN -->
-        <li sec:authorize="hasRole('SUPER_ADMIN')">
-            <a th:href="@{/super-admin/create-user}">
-                <span class="icon">👤</span>
-                <span>Créer utilisateur</span>
-            </a>
-        </li>
-        <li sec:authorize="hasRole('SUPER_ADMIN')">
-            <a th:href="@{/super-admin/create-departement}">
-                <span class="icon">🏢</span>
-                <span>Créer département</span>
-            </a>
-        </li>
-        
-        <!-- MENU CITIZEN -->
-        <li sec:authorize="hasRole('CITIZEN')">
-            <a th:href="@{/incident/declarer}">
-                <span class="icon">➕</span>
-                <span>Déclarer un incident</span>
-            </a>
-        </li>
-        
-        <!-- Liste incidents (PAS pour CITIZEN) -->
-        <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN', 'AGENT')">
-            <a th:href="@{/incidents/liste}">
-                <span class="icon">📋</span>
-                <span>Liste des incidents</span>
-            </a>
-        </li>
-        
-        <!-- EXPORTS (SUPER_ADMIN & ADMIN) -->
-        <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN')">
-            <a th:href="@{/export/csv}">
-                <span class="icon">📥</span>
-                <span>Export CSV</span>
-            </a>
-        </li>
-        <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN')">
-            <a th:href="@{/export/pdf}">
-                <span class="icon">📄</span>
-                <span>Export PDF</span>
-            </a>
-        </li>
-    </ul>
-</aside>
+    <aside class="sidebar">
+        <ul class="sidebar-menu">
+            <!-- Dashboard -->
+            <li sec:authorize="hasRole('SUPER_ADMIN')">
+                <a th:href="@{/super-admin/dashboard}">
+                    <span>📊</span>
+                    <span>Tableau de bord</span>
+                </a>
+            </li>
+            <li sec:authorize="hasRole('ADMIN')">
+                <a th:href="@{/admin/dashboard}">
+                    <span>📊</span>
+                    <span>Tableau de bord</span>
+                </a>
+            </li>
+            <li sec:authorize="hasRole('AGENT')">
+                <a th:href="@{/agent/dashboard}">
+                    <span>📊</span>
+                    <span>Tableau de bord</span>
+                </a>
+            </li>
+            <li sec:authorize="hasRole('CITIZEN')">
+                <a th:href="@{/citoyen/dashboard}">
+                    <span>📊</span>
+                    <span>Tableau de bord</span>
+                </a>
+            </li>
+            
+            <!-- SUPER_ADMIN -->
+            <li sec:authorize="hasRole('SUPER_ADMIN')">
+                <a th:href="@{/super-admin/create-user}">
+                    <span>👤</span>
+                    <span>Créer utilisateur</span>
+                </a>
+            </li>
+            <li sec:authorize="hasRole('SUPER_ADMIN')">
+                <a th:href="@{/super-admin/create-departement}">
+                    <span>🏢</span>
+                    <span>Créer département</span>
+                </a>
+            </li>
+            
+            <!-- CITIZEN -->
+            <li sec:authorize="hasRole('CITIZEN')">
+                <a th:href="@{/incident/declarer}">
+                    <span>➕</span>
+                    <span>Déclarer un incident</span>
+                </a>
+            </li>
+            
+            <!-- Liste incidents -->
+            <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN', 'AGENT')">
+                <a th:href="@{/incidents/liste}">
+                    <span>📋</span>
+                    <span>Liste des incidents</span>
+                </a>
+            </li>
+            
+            <!-- EXPORTS -->
+            <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN')">
+                <a th:href="@{/export/csv}">
+                    <span>📥</span>
+                    <span>Export CSV</span>
+                </a>
+            </li>
+            <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN')">
+                <a th:href="@{/export/pdf}">
+                    <span>📄</span>
+                    <span>Export PDF</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
 
     <!-- CONTENT -->
     <main class="content">
+        
+        <!-- Messages d'alerte -->
+        <div th:if="${success}" class="alert alert-success">
+            ✅ <span th:text="${success}"></span>
+        </div>
+
+        <div th:if="${error}" class="alert alert-error">
+            ❌ <span th:text="${error}"></span>
+        </div>
+
         <div class="detail-container">
             <div class="success-header">
                 <h2>📋 Détail de l'incident</h2>
@@ -386,6 +476,77 @@
                 </span>
             </div>
 
+            <!-- ========================================= -->
+            <!-- SECTION ACTIONS AGENT -->
+            <!-- ========================================= -->
+            <div sec:authorize="hasRole('AGENT')" 
+                 th:if="${incident.statut.name() != 'CLOTURE'}"
+                 class="agent-actions">
+                
+                <h3>⚡ Actions de gestion</h3>
+                
+                <!-- Info sur l'étape actuelle -->
+                <div class="action-info">
+                    <span th:if="${incident.statut.name() == 'SIGNALE'}">
+                        📌 Cet incident vient d'être signalé. Prenez-le en charge pour commencer le traitement.
+                    </span>
+                    <span th:if="${incident.statut.name() == 'PRIS_EN_CHARGE'}">
+                        📌 Vous avez pris en charge cet incident. Passez-le en résolution quand vous intervenez.
+                    </span>
+                    <span th:if="${incident.statut.name() == 'EN_RESOLUTION'}">
+                        📌 Intervention en cours. Marquez l'incident comme résolu une fois terminé.
+                    </span>
+                    <span th:if="${incident.statut.name() == 'RESOLU'}">
+                        📌 Incident résolu ! Le citoyen peut maintenant donner son feedback.
+                    </span>
+                </div>
+
+                <!-- Bouton : Prendre en charge -->
+                <form th:if="${incident.statut.name() == 'SIGNALE'}" 
+                      th:action="@{/agent/incident/{id}/changer-statut(id=${incident.id})}" 
+                      method="post">
+                    <input type="hidden" name="statut" value="PRIS_EN_CHARGE">
+                    <button type="submit" class="btn-action btn-prendre-charge">
+                        🔵 Prendre en charge
+                    </button>
+                </form>
+
+                <!-- Bouton : Passer en résolution -->
+                <form th:if="${incident.statut.name() == 'PRIS_EN_CHARGE'}" 
+                      th:action="@{/agent/incident/{id}/changer-statut(id=${incident.id})}" 
+                      method="post">
+                    <input type="hidden" name="statut" value="EN_RESOLUTION">
+                    <button type="submit" class="btn-action btn-resolution">
+                        🟡 Passer en résolution
+                    </button>
+                </form>
+
+                <!-- Bouton : Marquer résolu -->
+                <form th:if="${incident.statut.name() == 'EN_RESOLUTION'}" 
+                      th:action="@{/agent/incident/{id}/changer-statut(id=${incident.id})}" 
+                      method="post">
+                    <input type="hidden" name="statut" value="RESOLU">
+                    <button type="submit" class="btn-action btn-resolu">
+                        🟢 Marquer comme résolu
+                    </button>
+                </form>
+
+                <!-- Message si résolu -->
+                <div th:if="${incident.statut.name() == 'RESOLU'}" 
+                     style="background: #d4edda; padding: 15px; border-radius: 8px; text-align: center; color: #155724;">
+                    ✅ Incident résolu ! En attente du feedback du citoyen pour clôture.
+                </div>
+            </div>
+
+            <!-- Message si incident clôturé (pour l'agent) -->
+            <div sec:authorize="hasRole('AGENT')" 
+                 th:if="${incident.statut.name() == 'CLOTURE'}"
+                 style="background: #e8f5e9; border: 2px solid #4caf50; border-radius: 10px; padding: 20px; margin-bottom: 30px; text-align: center;">
+                <h3 style="color: #4caf50; margin-bottom: 10px;">✅ Incident clôturé</h3>
+                <p>Cet incident a été résolu et clôturé par le citoyen. Bravo ! 🎉</p>
+            </div>
+
+            <!-- Informations de l'incident -->
             <div class="info-row">
                 <div class="label">📋 Titre</div>
                 <div th:text="${incident.titre}"></div>
@@ -401,6 +562,17 @@
                 <div th:text="${incident.categorie?.nom}">Non spécifiée</div>
             </div>
 
+            <div class="info-row" sec:authorize="hasRole('AGENT')">
+                <div class="label">⚠️ Priorité</div>
+                <div>
+                    <span th:text="${incident.priorite == 1 ? '🟢 Faible' :
+                                    incident.priorite == 2 ? '🟡 Moyenne' :
+                                    incident.priorite == 3 ? '🟠 Haute' :
+                                    incident.priorite == 4 ? '🔴 Critique' :
+                                    '⚪ Non définie'}"></span>
+                </div>
+            </div>
+
             <div class="info-row">
                 <div class="label">📍 Adresse</div>
                 <div th:text="${incident.adresse}"></div>
@@ -414,6 +586,11 @@
             <div class="info-row">
                 <div class="label">📅 Date de déclaration</div>
                 <span th:text="${#temporals.format(incident.dateDeclaration,'dd/MM/yyyy HH:mm')}"></span>
+            </div>
+
+            <div class="info-row" sec:authorize="hasAnyRole('AGENT', 'ADMIN', 'SUPER_ADMIN')">
+                <div class="label">👤 Déclaré par</div>
+                <div th:text="${incident.citoyen?.prenom + ' ' + incident.citoyen?.nom}"></div>
             </div>
 
             <div class="info-row">
@@ -475,11 +652,22 @@
                 </form>
             </div>
 
+            <!-- Affichage du feedback pour l'agent -->
+            <div sec:authorize="hasRole('AGENT')" 
+                 th:if="${incident.statut.name() == 'CLOTURE' && incident.feedbackCitoyen != null}"
+                 style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; border-radius: 5px; margin-top: 20px;">
+                <strong>💬 Feedback du citoyen :</strong>
+                <p th:text="${incident.feedbackCitoyen}" style="margin-top: 8px; font-style: italic;"></p>
+            </div>
+
             <div style="text-align:center">
                 <a th:href="@{/citoyen/dashboard}" class="btn-back" sec:authorize="hasRole('CITIZEN')">
                     ← Retour au tableau de bord
                 </a>
-                <a th:href="@{/incidents/liste}" class="btn-back" sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN', 'AGENT')">
+                <a th:href="@{/agent/dashboard}" class="btn-back" sec:authorize="hasRole('AGENT')">
+                    ← Retour au tableau de bord
+                </a>
+                <a th:href="@{/incidents/liste}" class="btn-back" sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN')">
                     ← Retour à la liste
                 </a>
             </div>

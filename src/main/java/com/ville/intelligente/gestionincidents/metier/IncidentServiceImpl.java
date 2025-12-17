@@ -18,8 +18,11 @@ import com.ville.intelligente.gestionincidents.dao.QuartierDAO;
 import com.ville.intelligente.gestionincidents.model.Incident;
 import com.ville.intelligente.gestionincidents.model.Photo;
 import com.ville.intelligente.gestionincidents.model.CategorieIncident;  
-import com.ville.intelligente.gestionincidents.model.Quartier;  
-import com.ville.intelligente.gestionincidents.model.enums.StatutIncident; 
+import com.ville.intelligente.gestionincidents.model.Quartier;
+import com.ville.intelligente.gestionincidents.model.Utilisateur;
+import com.ville.intelligente.gestionincidents.model.enums.StatutIncident;
+
+import jakarta.transaction.Transactional; 
 
 @Service
 public class IncidentServiceImpl implements IncidentService {
@@ -139,6 +142,93 @@ public class IncidentServiceImpl implements IncidentService {
              ) {
         return incidentDao.findByFilters(statut, categorie,quartier,dateDeclaration);
     }
+    @Override
+    @Transactional
+    public Incident changerStatut(Long incidentId, StatutIncident nouveauStatut, Utilisateur agent) {
+        
+        // 1. Récupérer l'incident
+        Incident incident = incidentDao.findById(incidentId)
+                .orElseThrow(() -> new RuntimeException("Incident non trouvé"));
+
+        // 2. Vérifier que l'agent est bien assigné à cet incident
+        if (incident.getAgentAssigne() == null || 
+            !incident.getAgentAssigne().getId().equals(agent.getId())) {
+            throw new RuntimeException("Vous n'êtes pas assigné à cet incident");
+        }
+
+        // 3. Récupérer le statut actuel
+        StatutIncident ancienStatut = incident.getStatut();
+        
+        // 4. Valider la transition de statut
+        validerTransition(ancienStatut, nouveauStatut);
+
+        // 5. Changer le statut
+        incident.setStatut(nouveauStatut);
+        if (nouveauStatut == StatutIncident.RESOLU && incident.getDateResolution() == null) {
+            incident.setDateResolution(LocalDateTime.now());
+        }
+        
+        // 6. Sauvegarder et retourner
+        return incidentDao.save(incident);
+    }
+
+    /**
+     * Valide que la transition de statut est autorisée
+     */
+    private void validerTransition(StatutIncident ancien, StatutIncident nouveau) {
+        
+        // On ne peut pas modifier un incident clôturé
+        if (ancien == StatutIncident.CLOTURE) {
+            throw new RuntimeException("Impossible de modifier un incident clôturé");
+        }
+
+        // Vérifier les transitions autorisées selon le workflow
+        switch (ancien) {
+            case SIGNALE:
+                if (nouveau != StatutIncident.PRIS_EN_CHARGE) {
+                    throw new RuntimeException("Un incident signalé doit être pris en charge");
+                }
+                break;
+                
+            case PRIS_EN_CHARGE:
+                if (nouveau != StatutIncident.EN_RESOLUTION) {
+                    throw new RuntimeException("Un incident pris en charge doit passer en résolution");
+                }
+                break;
+                
+            case EN_RESOLUTION:
+                if (nouveau != StatutIncident.RESOLU) {
+                    throw new RuntimeException("Un incident en résolution doit être marqué comme résolu");
+                }
+                break;
+                
+            case RESOLU:
+                // Cette transition sera gérée par le citoyen (feedback)
+                if (nouveau != StatutIncident.CLOTURE) {
+                    throw new RuntimeException("Un incident résolu ne peut être que clôturé par le citoyen");
+                }
+                break;
+                
+            default:
+                throw new RuntimeException("Transition de statut invalide");
+        }
+    }
+    
+    @Override
+    public List<Incident> getIncidentsParDepartement(Long departementId) {
+        return incidentDao.findByCategorie_Id(departementId);
+    }
+
+    @Override
+    public List<Incident> getIncidentsByAgent(Utilisateur agent) {
+        return incidentDao.findByAgentAssigne(agent);
+    }
+
+    @Override
+    public List<Incident> getIncidentsByCitoyen(Utilisateur citoyen) {
+        return incidentDao.findByCitoyen(citoyen);
+    }
+
     
     
 }

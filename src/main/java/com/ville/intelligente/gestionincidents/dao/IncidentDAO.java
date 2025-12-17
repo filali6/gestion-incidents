@@ -24,6 +24,11 @@ public interface IncidentDAO extends JpaRepository<Incident, Long> {
     
     List<Incident> findByAgentAssigne(Utilisateur agent);
 
+    @Query(value = "SELECT AVG(DATEDIFF(date_resolution, date_declaration)) FROM incidents WHERE date_resolution IS NOT NULL", nativeQuery = true)
+    Double getDelaiMoyenResolution();
+    
+     
+
     // Compter par catégorie
     @Query("SELECT COUNT(i) FROM Incident i WHERE i.categorie.nom = ?1")
     long countByCategorie(String categorieNom);
