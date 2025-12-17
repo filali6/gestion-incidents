@@ -227,12 +227,50 @@
     <div class="main-container">
 
         <!-- SIDEBAR -->
-        <aside class="sidebar">
-            <ul class="sidebar-menu">
-                <li><a th:href="@{/dashboard}">📊 Tableau de bord</a></li>
-                <li><a th:href="@{/profile}" class="active">👤 Mon profil</a></li>
-            </ul>
-        </aside>
+       <aside class="sidebar">
+        <ul class="sidebar-menu">
+            <li sec:authorize="hasRole('SUPER_ADMIN')">
+                <a th:href="@{/super-admin/dashboard}" class="active"><span>📊</span> <span>Tableau de bord</span></a>
+            </li>
+            <li sec:authorize="hasRole('ADMIN')">
+                <a th:href="@{/admin/dashboard}" class="active"><span>📊</span> <span>Tableau de bord</span></a>
+            </li>
+            <li sec:authorize="hasRole('AGENT')">
+                <a th:href="@{/agent/dashboard}" class="active"><span>📊</span> <span>Tableau de bord</span></a>
+            </li>
+            <li sec:authorize="hasRole('CITIZEN')">
+                <a th:href="@{/citoyen/dashboard}" class="active"><span>📊</span> <span>Tableau de bord</span></a>
+            </li>
+            
+            <li sec:authorize="hasRole('SUPER_ADMIN')">
+                <a th:href="@{/super-admin/create-user}"><span>👤</span> <span>Créer utilisateur</span></a>
+            </li>
+            <li sec:authorize="hasRole('SUPER_ADMIN')">
+                <a th:href="@{/super-admin/create-departement}"><span>🏢</span> <span>Créer département</span></a>
+            </li>
+            
+            <li sec:authorize="hasRole('CITIZEN')">
+                <a th:href="@{/incident/declarer}"><span>➕</span> <span>Déclarer un incident</span></a>
+            </li>
+            
+            <li sec:authorize="hasAnyRole('SUPER_ADMIN')">
+                <a th:href="@{/incidents/liste}"><span>📋</span> <span>Liste des incidents</span></a>
+            </li>
+            
+            <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN')">
+                <a th:href="@{/export/csv}"><span>📥</span> <span>Export CSV</span></a>
+            </li>
+            <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN')">
+                <a th:href="@{/export/pdf}"><span>📄</span> <span>Export PDF</span></a>
+            </li>
+            <li>
+                <a th:href="@{/profile}">
+                    <span>👤</span>
+                    <span>Mon profil</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
 
         <!-- CONTENT -->
         <main class="content">
