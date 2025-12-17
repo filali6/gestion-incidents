@@ -1,5 +1,7 @@
 package com.ville.intelligente.gestionincidents.dao;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,15 +31,15 @@ public interface IncidentDAO extends JpaRepository<Incident, Long> {
     
      
 
-    // Compter par catégorie
+    // Count par catégorie
     @Query("SELECT COUNT(i) FROM Incident i WHERE i.categorie.nom = ?1")
     long countByCategorie(String categorieNom);
 
-    // Compter par quartier
+    // Count par quartier
     @Query("SELECT COUNT(i) FROM Incident i WHERE i.quartier.nom = ?1")
     long countByQuartier(String quartierNom);
 
-    // Récupérer tous par statut
+    // find par statut
     List<Incident> findByStatut(StatutIncident statut);
 
     // Récupérer par catégorie
@@ -51,11 +53,9 @@ public interface IncidentDAO extends JpaRepository<Incident, Long> {
     @Query("SELECT i.quartier.nom, COUNT(i) FROM Incident i GROUP BY i.quartier.nom ORDER BY COUNT(i) DESC")
     List<Object[]> countByQuartier();
 
-    // Pour le graphique temporel
-    @Query("SELECT FUNCTION('DATE', i.dateDeclaration), COUNT(i) FROM Incident i GROUP BY FUNCTION('DATE', i.dateDeclaration) ORDER BY FUNCTION('DATE', i.dateDeclaration)")
-    List<Object[]> countByDate();
+     
 
-    // Recherche avec filtres - Compare seulement la DATE (pas l'heure)
+    //  filtres - Compare seulement la DATE  
     @Query("SELECT i FROM Incident i WHERE " +
             "(:statut IS NULL OR i.statut = :statut) AND " +
             "(:categorie IS NULL OR :categorie = '' OR i.categorie.nom = :categorie) AND " +
@@ -66,5 +66,22 @@ public interface IncidentDAO extends JpaRepository<Incident, Long> {
             @Param("categorie") String categorie,
             @Param("quartier") String quartier,
             @Param("dateDeclaration")  Date dateDeclaration);
+
+    Page<Incident> findAll(Pageable pageable);
+    
+    @Query("SELECT i FROM Incident i " +
+                    "LEFT JOIN i.categorie c " +
+                    "LEFT JOIN i.quartier q " +
+                    "WHERE (:statut IS NULL OR i.statut = :statut) " +
+                    "AND (:categorie IS NULL OR :categorie = '' OR c.nom = :categorie) " +
+                    "AND (:quartier IS NULL OR :quartier = '' OR q.nom = :quartier) " +
+                    "AND (:dateDeclaration IS NULL OR CAST(i.dateDeclaration AS date) = :dateDeclaration)")
+    Page<Incident> findByFiltersWithPageable(
+                    @Param("statut") StatutIncident statut,
+                    @Param("categorie") String categorie,
+                    @Param("quartier") String quartier,
+                    @Param("dateDeclaration") Date dateDeclaration,
+                    Pageable pageable);
+
 
     }

@@ -21,7 +21,7 @@ public class DashboardController {
 
     @GetMapping
     public String afficherDashboard(Model model) {
-        // Passer les stats au template
+        
         model.addAttribute("totalIncidents", statistiqueService.compterTotalIncidents());
         model.addAttribute("statsStatut", statistiqueService.getStatistiquesParStatut());
         model.addAttribute("statsCategorie", statistiqueService.getStatistiquesParCategorie());

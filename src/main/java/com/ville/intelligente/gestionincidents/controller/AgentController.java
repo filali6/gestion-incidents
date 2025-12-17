@@ -46,13 +46,10 @@ public class AgentController {
 
     @GetMapping("/dashboard")
     public String afficherDashboard(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        // Récupérer l'agent connecté
         Utilisateur agent = utilisateurService.findByEmail(userDetails.getUsername());
 
-        // Récupérer UNIQUEMENT les incidents assignés à cet agent
         List<Incident> mesIncidents = incidentDAO.findByAgentAssigne(agent);
 
-        // Stats personnalisées
         long totalMesIncidents = mesIncidents.size();
 
         model.addAttribute("totalIncidents", totalMesIncidents);
@@ -69,15 +66,15 @@ public class AgentController {
                                 @AuthenticationPrincipal UserDetails userDetails,
                                 RedirectAttributes redirectAttributes) {
         try {
-            // Récupérer l'agent connecté
+             
             Utilisateur agent = utilisateurService.findByEmail(userDetails.getUsername());
             
-            // Convertir le statut (String → Enum)
+             
             StatutIncident nouveauStatut = StatutIncident.valueOf(nouveauStatutStr);
             Incident incident = incidentDAO.findById(id)
                     .orElseThrow(() -> new RuntimeException("Incident non trouvé"));
             
-            // Appeler le service pour changer le statut
+             
             incidentService.changerStatut(id, nouveauStatut, agent);
 
             if (nouveauStatut == StatutIncident.RESOLU && incident.getCitoyen() != null) {
@@ -93,7 +90,7 @@ public class AgentController {
                 emailService.envoyerEmail(incident.getCitoyen().getEmail(), sujet, contenu);
             }
             
-            // Message de succès
+            
             redirectAttributes.addFlashAttribute("success", "Statut changé avec succès !");
             
         } catch (IllegalArgumentException e) {
@@ -102,7 +99,7 @@ public class AgentController {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
         
-        // Rediriger vers la page de détail existante
+         
         return "redirect:/incident/" + id;
     }
 }

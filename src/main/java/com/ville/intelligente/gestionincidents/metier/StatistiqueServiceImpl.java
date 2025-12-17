@@ -90,14 +90,14 @@ public class StatistiqueServiceImpl implements StatistiqueService {
     public Map<String, Long> getStatistiquesParStatutPourCitoyen(Utilisateur citoyen) {
         Map<String, Long> stats = new HashMap<>();
 
-        // Initialiser à 0
+        
         stats.put("SIGNALE", 0L);
         stats.put("PRIS_EN_CHARGE", 0L);
         stats.put("EN_RESOLUTION", 0L);
         stats.put("RESOLU", 0L);
         stats.put("CLOTURE", 0L);
 
-        // Compter les incidents
+         
         List<Incident> incidents = incidentDao.findByCitoyen(citoyen);
         for (Incident incident : incidents) {
             if (incident.getStatut() != null) {
@@ -118,14 +118,14 @@ public class StatistiqueServiceImpl implements StatistiqueService {
     public Map<String, Long> getStatistiquesParStatutPourAgent(Utilisateur agent) {
         Map<String, Long> stats = new HashMap<>();
 
-        // Initialiser à 0
+         
         stats.put("SIGNALE", 0L);
         stats.put("PRIS_EN_CHARGE", 0L);
         stats.put("EN_RESOLUTION", 0L);
         stats.put("RESOLU", 0L);
         stats.put("CLOTURE", 0L);
 
-        // Compter les incidents
+         
         List<Incident> incidents = incidentDao.findByAgentAssigne(agent);
         for (Incident incident : incidents) {
             if (incident.getStatut() != null) {
@@ -146,14 +146,14 @@ public class StatistiqueServiceImpl implements StatistiqueService {
     public Map<String, Long> getStatistiquesParStatutPourDepartement(Long departementId) {
         Map<String, Long> stats = new HashMap<>();
 
-        // Initialiser à 0
+         
         stats.put("SIGNALE", 0L);
         stats.put("PRIS_EN_CHARGE", 0L);
         stats.put("EN_RESOLUTION", 0L);
         stats.put("RESOLU", 0L);
         stats.put("CLOTURE", 0L);
 
-        // Compter les incidents
+         
         List<Incident> incidents = incidentDao.findByCategorie_Id(departementId);
         for (Incident incident : incidents) {
             if (incident.getStatut() != null) {
@@ -171,7 +171,7 @@ public class StatistiqueServiceImpl implements StatistiqueService {
         if (delai == null) {
             return 0.0;
         }
-        // Arrondir à 1 décimale
+         
         return Math.round(delai * 10.0) / 10.0;
     }
 }

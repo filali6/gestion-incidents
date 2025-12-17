@@ -36,28 +36,53 @@ public class IncidentController {
         
     }
 
-    //  afficher le formulaire
+     
     @GetMapping("/declarer")
     public String showForm(Model model) {
         model.addAttribute("incident", new Incident());
         return "incident-form";
     }
 
-    //   traiter la soumission du formulaire
+     
     @PostMapping("/save")
     public String saveIncident(
         Incident incident,
-        @RequestParam("photoFile") MultipartFile photoFile,@RequestParam("categorieNom") String categorieNom,      // ⭐ AJOUTE
-    @RequestParam("quartierNom") String quartierNom,@RequestParam("quartierVille") String quartierVille,        // ⭐ AJOUTE
-    @RequestParam("quartierCodePostal") int quartierCodePostal, @AuthenticationPrincipal UserDetails userDetails,RedirectAttributes redirectAttributes) 
+        @RequestParam("photoFile") MultipartFile photoFile,@RequestParam("categorieNom") String categorieNom,      
+    @RequestParam("quartierNom") String quartierNom,@RequestParam("quartierVille") String quartierVille,         
+    @RequestParam("quartierCodePostal") int quartierCodePostal, @AuthenticationPrincipal UserDetails userDetails,RedirectAttributes redirectAttributes, Model model) 
           {
               Utilisateur citoyen = utilisateurService.findByEmail(userDetails.getUsername());
               incident.setCitoyen(citoyen);
               incident.setPriorite(2);
 
+
+              
+               
+              if (photoFile != null && !photoFile.isEmpty()) {
+
+                  
+                  if (photoFile.getSize() > 5 * 1024 * 1024) {
+                      model.addAttribute("error", " La photo ne doit pas dépasser 5MB");
+                      model.addAttribute("incident", incident);
+                      return "incident-form";
+                  }
+
+                  
+                  String contentType = photoFile.getContentType();
+                  if (contentType == null ||
+                          (!contentType.equals("image/jpeg") &&
+                                  !contentType.equals("image/png") &&
+                                  !contentType.equals("image/jpg"))) {
+                      model.addAttribute("error", " Seuls les formats JPG, JPEG et PNG sont autorisés");
+                      model.addAttribute("incident", incident);
+                      return "incident-form";
+                  }
+              }
+
     Incident savedIncident =
             incidentService.saveIncidentWithPhoto(incident, photoFile, categorieNom, quartierNom, quartierVille,
                     quartierCodePostal);
+    redirectAttributes.addFlashAttribute("success", " Incident déclaré avec succès !");
 
     return "redirect:/citoyen/dashboard"  ;
 }
@@ -77,22 +102,22 @@ public String soumettFeedback(
         @AuthenticationPrincipal UserDetails userDetails,
         RedirectAttributes redirectAttributes) {
     
-    // Récupérer l'incident
+     
     Incident incident = incidentDAO.findById(id)
             .orElseThrow(() -> new RuntimeException("Incident non trouvé"));
     
-    // Vérifier que c'est bien le citoyen propriétaire
+     
     Utilisateur citoyen = utilisateurService.findByEmail(userDetails.getUsername());
     if (!incident.getCitoyen().getId().equals(citoyen.getId())) {
         throw new RuntimeException("Vous n'êtes pas autorisé à donner un feedback sur cet incident");
     }
     
-    // Vérifier que l'incident est bien RESOLU
+ 
     if (incident.getStatut() != StatutIncident.RESOLU) {
         throw new RuntimeException("Le feedback n'est possible que pour les incidents résolus");
     }
     
-    // Enregistrer le feedback et clôturer
+    
     incident.setFeedbackCitoyen(feedbackCitoyen);
     incident.setStatut(StatutIncident.CLOTURE);
     incidentDAO.save(incident);

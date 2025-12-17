@@ -57,15 +57,15 @@ public class Utilisateur {
     private boolean emailVerifie = false;
     private String tokenVerificationEmail;
 
-    // Incidents déclarés (citoyen)
+     
     @OneToMany(mappedBy = "citoyen", fetch = FetchType.LAZY)
     private List<Incident> incidentsDeclares;
 
-    // Incidents assignés (agent)
+     
     @OneToMany(mappedBy = "agentAssigne", fetch = FetchType.LAZY)
     private List<Incident> incidentsAssignes;
 
-    // Notifications reçues
+     
     @OneToMany(mappedBy = "utilisateur", fetch = FetchType.LAZY)
     private List<Notification> notifications;
 
